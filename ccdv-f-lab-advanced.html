@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<!-- build: 2026090203 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 3 &mdash; Build and ship an agent | CCDV-F prep</title>
+<style>
+:root{
+  --ink:#1B2124; --ink-2:#495259; --rule:#DFE3DE; --paper:#F6F7F5; --panel:#FFFFFF;
+  --level:#4A3A96; --level-soft:#ECEAF7;
+  --lens:#B0721A; --lens-soft:#FBF4E7;
+  --verify:#41525F; --verify-soft:#EEF2F4;
+  --caution:#9E3025; --caution-soft:#FBEDEB;
+  --serif: Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;
+  --sans: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);
+  font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px 90px}
+a{color:var(--level);text-decoration-thickness:1px;text-underline-offset:2px}
+.masthead{border-bottom:1px solid var(--rule);background:var(--panel)}
+.masthead .wrap{padding-top:38px;padding-bottom:30px}
+.crumb{font-family:var(--sans);font-size:13px;color:var(--ink-2);margin:0 0 14px}
+.who{float:right;font-size:12.5px;color:var(--ink-2)}
+.back{color:var(--level);text-decoration:none;font-weight:600}
+.back:hover{text-decoration:underline}
+.nav-bottom{display:flex;justify-content:center;margin:30px 0 0}
+.btn-back{display:inline-block;background:var(--level);color:#fff;text-decoration:none;
+  font-family:var(--sans);font-size:14.5px;font-weight:600;padding:11px 22px;border-radius:8px}
+.btn-back:hover{filter:brightness(1.08)}
+.setup{background:var(--level-soft);border-left:3px solid var(--level)}
+.setup .tag{color:var(--level)}
+.signout{background:none;border:0;color:var(--level);font-size:12.5px;cursor:pointer;
+  text-decoration:underline;font-family:inherit;padding:0}
+.chip{display:inline-block;font-family:var(--sans);font-size:12px;letter-spacing:.02em;
+  color:#fff;background:var(--level);border-radius:3px;padding:3px 9px;margin-right:8px}
+h1{font-family:var(--sans);font-weight:640;font-size:31px;line-height:1.2;margin:0 0 10px;letter-spacing:-.015em}
+.deck{font-size:18px;color:var(--ink-2);margin:0;max-width:62ch}
+.facts{display:flex;flex-wrap:wrap;gap:22px;margin-top:22px;padding-top:18px;border-top:1px solid var(--rule);
+  font-family:var(--sans);font-size:13.5px;color:var(--ink-2)}
+.facts b{display:block;color:var(--ink);font-weight:600}
+.progress{position:sticky;top:0;z-index:20;background:rgba(246,247,245,.94);
+  backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.progress .wrap{display:flex;align-items:center;gap:14px;padding-top:9px;padding-bottom:9px}
+.bar{flex:1;height:4px;background:var(--rule);border-radius:2px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--level);transition:width .25s ease}
+.count{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+h2{font-family:var(--sans);font-weight:640;font-size:22px;line-height:1.25;margin:0;letter-spacing:-.01em}
+h3{font-family:var(--sans);font-weight:620;font-size:16px;margin:26px 0 8px}
+p{margin:0 0 14px;max-width:70ch}
+ul,ol{max-width:70ch;padding-left:22px}
+li{margin-bottom:7px}
+code{font-family:var(--mono);font-size:.86em;background:#EFF1EE;padding:1px 5px;border-radius:3px}
+pre{font-family:var(--mono);font-size:13px;line-height:1.55;background:#171C1F;color:#E7ECEA;
+  padding:16px 18px;border-radius:5px;overflow-x:auto;margin:0 0 16px}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+.filename{font-family:var(--sans);font-size:12px;color:var(--ink-2);margin:0 0 5px}
+section.stage{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:26px 28px;margin:26px 0}
+.stage-head{display:flex;gap:16px;align-items:baseline;margin-bottom:6px}
+.num{font-family:var(--mono);font-size:14px;color:var(--level);border:1px solid var(--level);
+  border-radius:50%;width:30px;height:30px;min-width:30px;display:flex;align-items:center;
+  justify-content:center;align-self:flex-start;margin-top:2px}
+.goal{font-family:var(--sans);font-size:14px;color:var(--ink-2);margin:0 0 18px 46px}
+.stage-body{margin-left:46px}
+.callout{border-radius:5px;padding:14px 16px;margin:0 0 16px;font-size:15.5px}
+.callout p{margin:0;max-width:64ch}
+.callout p+p{margin-top:9px}
+.callout .tag{font-family:var(--sans);font-size:12.5px;font-weight:640;display:block;margin-bottom:5px}
+.lens{background:var(--lens-soft);border-left:3px solid var(--lens)}
+.lens .tag{color:var(--lens)}
+.verify{background:var(--verify-soft);border-left:3px dashed var(--verify)}
+.verify .tag{color:var(--verify)}
+.caution{background:var(--caution-soft);border-left:3px solid var(--caution)}
+.caution .tag{color:var(--caution)}
+.done{background:var(--level-soft);border-radius:5px;padding:14px 16px 8px;margin-top:20px}
+.done .tag{font-family:var(--sans);font-size:12.5px;font-weight:640;color:var(--level);display:block;margin-bottom:8px}
+.done label{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;margin-bottom:8px;cursor:pointer}
+.done input{margin-top:6px;accent-color:var(--level);width:15px;height:15px;flex:none}
+.done label.checked{color:var(--ink-2);text-decoration:line-through;text-decoration-color:var(--rule)}
+.orient{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:26px 28px;margin:26px 0}
+figure{margin:0 0 22px}
+figcaption{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin-top:8px}
+svg{width:100%;height:auto;display:block}
+dl{margin:0;max-width:70ch}
+dt{font-family:var(--sans);font-weight:620;font-size:15px;margin-top:14px}
+dd{margin:2px 0 0;color:var(--ink-2);font-size:16px}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:0 0 16px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--sans);font-size:13px;font-weight:620}
+footer{border-top:1px solid var(--rule);margin-top:40px;padding-top:18px;
+  font-family:var(--sans);font-size:12.5px;color:var(--ink-2);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media (max-width:620px){
+  body{font-size:16px}
+  .stage-body,.goal{margin-left:0}
+  .stage-head{gap:12px}
+  section.stage,.orient{padding:20px 18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="crumb"><span id="who" class="who"></span><a class="back" href="index.html?v=2026090204">&#8592; Dashboard</a> &middot; SF Knowledge Hub &middot; Claude Certified Developer &ndash; Foundations (CCDV-F) prep</p>
+    <p><span class="chip">Lab 3 &middot; Advanced</span></p>
+    <h1>Build and ship an agent</h1>
+    <p class="deck">Choose the pattern honestly, build the loop with budgets and a trace, delegate to subagents, manage memory, enforce rules with hooks rather than requests, evaluate the path as well as the answer, and ship it with configuration, secrets and logs that survive contact with production.</p>
+    <div class="facts"><div><b>Language</b>Python (TypeScript shown)</div><div><b>Time</b>3.5&ndash;4 hours</div><div><b>Cost</b>Roughly $3&ndash;4 in API usage</div><div><b>Exam domains</b>1, 2, 3, 4, 5, 7</div><div><b>You need</b>Labs 1 and 2 finished</div></div>
+  </div>
+</header>
+
+<div class="progress"><div class="wrap">
+  <div class="bar"><span id="fill"></span></div>
+  <div class="count" id="count">0 of 0 checks done</div>
+</div></div>
+
+<div class="wrap">
+
+<div class="orient">
+  <h2>Orientation</h2>
+  <p>The release assistant becomes an agent. Given a repository and a date range, it plans its own steps, gathers pull requests, classifies each change, drafts notes, checks them against a style guide, and hands back a result with a trace of what it did.</p>
+  <p>The distinction that matters: a workflow is a path you wrote, and an agent chooses its own path. You give up predictability and gain the ability to handle inputs you did not anticipate. Everything else in this lab exists to buy back some of the predictability you traded away.</p>
+
+<figure>
+<svg viewBox="0 0 780 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A request enters an orchestrator which plans, dispatches subagents with their own contexts, compacts memory, and returns a result. Hooks enforce rules deterministically and an eval harness scores runs offline.">
+  <defs>
+    <marker id="c3" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#495259"/></marker>
+    <style>
+      .bx{fill:#FFFFFF;stroke:#DFE3DE;stroke-width:1.5;rx:5}
+      .bxa{fill:#ECEAF7;stroke:#4A3A96;stroke-width:1.5;rx:5}
+      .t{font-family:ui-sans-serif,'Segoe UI',Roboto,sans-serif;font-size:13px;fill:#1B2124}
+      .s{font-family:ui-sans-serif,'Segoe UI',Roboto,sans-serif;font-size:11px;fill:#495259}
+      .lbl{font-family:ui-sans-serif,'Segoe UI',Roboto,sans-serif;font-size:11px;fill:#8D979C}
+      .ln{stroke:#495259;stroke-width:1.4;fill:none;marker-end:url(#c3)}
+      .lnd{stroke:#8D979C;stroke-width:1.2;fill:none;stroke-dasharray:4 4;marker-end:url(#c3)}
+    </style>
+  </defs>
+  <rect class="bx" x="8" y="128" width="112" height="52"/>
+  <text class="t" x="26" y="152">Task</text>
+  <text class="s" x="26" y="169">one request</text>
+  <path class="ln" d="M122 154 H176"/>
+
+  <rect class="bxa" x="180" y="106" width="160" height="96"/>
+  <text class="t" x="198" y="130">Orchestrator</text>
+  <text class="s" x="198" y="150">plan</text>
+  <text class="s" x="198" y="168">dispatch</text>
+  <text class="s" x="198" y="186">assemble</text>
+
+  <path class="ln" d="M342 130 H400"/>
+  <path class="ln" d="M342 154 H400"/>
+  <path class="ln" d="M342 178 H400"/>
+  <rect class="bxa" x="404" y="106" width="150" height="30"/>
+  <text class="s" x="420" y="126">subagent: gather</text>
+  <rect class="bxa" x="404" y="142" width="150" height="30"/>
+  <text class="s" x="420" y="162">subagent: classify</text>
+  <rect class="bxa" x="404" y="178" width="150" height="30"/>
+  <text class="s" x="420" y="198">subagent: draft</text>
+  <text class="s" x="404" y="228">each with its own context window</text>
+
+  <path class="ln" d="M556 154 H616"/>
+  <rect class="bx" x="620" y="128" width="144" height="52"/>
+  <text class="t" x="638" y="152">Result</text>
+  <text class="s" x="638" y="169">plus a trace</text>
+
+  <text class="lbl" x="10" y="270">Around the loop</text>
+  <rect class="bx" x="8" y="282" width="180" height="46"/>
+  <text class="s" x="26" y="310">Hooks &#8212; deterministic</text>
+  <rect class="bx" x="200" y="282" width="180" height="46"/>
+  <text class="s" x="218" y="310">Memory / compaction</text>
+  <rect class="bx" x="392" y="282" width="180" height="46"/>
+  <text class="s" x="410" y="310">Eval harness</text>
+  <rect class="bx" x="584" y="282" width="180" height="46"/>
+  <text class="s" x="602" y="310">Config + secrets</text>
+  <path class="lnd" d="M98 278 V210 H258"/>
+  <path class="lnd" d="M290 278 V210"/>
+</svg>
+<figcaption>An agent is a loop with a plan, a budget and a memory strategy. Hooks sit outside the model's judgement, which is what makes them enforcement rather than instruction.</figcaption>
+</figure>
+
+  <h3>Glossary</h3>
+  <dl>
+    <dt>Workflow vs agent</dt>
+    <dd>A workflow has fixed steps with the model filling gaps. An agent decides its own sequence and stopping point. Prefer a workflow whenever the steps are actually known.</dd>
+    <dt>Orchestrator-worker</dt>
+    <dd>One agent plans and delegates to subagents, each with its own context window and narrower toolset, then assembles their outputs.</dd>
+    <dt>Subagent</dt>
+    <dd>A separate agent invocation with its own context. Its intermediate work never enters the orchestrator's window, which is the main reason to use one.</dd>
+    <dt>Compaction</dt>
+    <dd>Summarising earlier turns so a long-running agent stays inside its context window without losing the thread.</dd>
+    <dt>Hook</dt>
+    <dd>Code that runs at a fixed point in the loop — before or after a tool call — and can block it. Deterministic, unlike an instruction the model may weigh against other instructions.</dd>
+  </dl>
+<div class="callout verify"><span class="tag">Verify</span>
+<p>The Agent SDK, Claude Code configuration and hook event names change with releases. Confirm current package names, settings file locations and event names in the documentation before following stages 3 and 5 literally.</p>
+</div></div><section class="stage">
+  <div class="stage-head"><div class="num">1</div><h2>Decide whether you need an agent at all</h2></div>
+  <p class="goal">Writing. The cheapest stage and the one most often skipped.</p>
+  <div class="stage-body">
+<p>Write down the steps your release-notes task requires. If you can write them all, you have a workflow, and a workflow is cheaper, faster, testable and debuggable.</p>
+<table>
+  <tr><th>Pattern</th><th>Shape</th><th>Use when</th></tr>
+  <tr><td>Single call</td><td>One prompt, one response</td><td>The task fits in one step</td></tr>
+  <tr><td>Chain</td><td>Output of one call feeds the next</td><td>Steps are known and always in the same order</td></tr>
+  <tr><td>Routing</td><td>Classify first, then dispatch to a specialised path</td><td>Input kinds differ and each needs different handling</td></tr>
+  <tr><td>Parallel</td><td>Fan out independent calls, then merge</td><td>Subtasks do not depend on each other</td></tr>
+  <tr><td>Orchestrator-worker</td><td>A planner delegates to subagents</td><td>The number and nature of subtasks depend on the input</td></tr>
+  <tr><td>Autonomous loop</td><td>Model decides each next step until done</td><td>The path genuinely cannot be known in advance</td></tr>
+</table>
+<p>For release notes, most of it is a chain: gather, classify, draft, check. Only classification of an unknown number of changes benefits from delegation. So the honest design is a workflow with one agentic segment — which is what you will build.</p>
+<div class="callout lens"><span class="tag">Exam lens</span>
+<p>Scenario questions describe a task and expect the simplest sufficient pattern. Fixed known steps means a chain, and answering "agent" there is over-engineering — a distractor that appears often. The trigger for a real agent is that the number or order of steps depends on input the developer cannot see in advance. Also know the cost shape: agents multiply calls, so an agentic design needs a step ceiling and a token budget before it ships.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">You have written the steps your task needs.</label><label><input type="checkbox">You can name which single part genuinely requires the model to decide, and why the rest does not.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">2</div><h2>Build the agent loop by hand</h2></div>
+  <p class="goal">Code. Extend Lab 2's loop with a plan, a budget and a trace.</p>
+  <div class="stage-body">
+<p>The Lab 2 loop already runs until the model stops calling tools. An agent adds three things: an explicit plan, resource limits, and a record of what happened.</p>
+<p class="filename">agent.py</p>
+<pre><code>class Agent:
+    def __init__(self, tools, registry, model="claude-sonnet-4-6",
+                 max_steps=12, token_budget=120_000):
+        self.tools, self.registry = tools, registry
+        self.model, self.max_steps, self.token_budget = model, max_steps, token_budget
+
+    def run(self, task, system):
+        messages = [{"role": "user", "content": task}]
+        trace, spent = [], 0
+
+        for step in range(self.max_steps):
+            resp = client.messages.create(
+                model=self.model, max_tokens=4096, system=system,
+                tools=self.tools, messages=messages,
+            )
+            spent += resp.usage.input_tokens + resp.usage.output_tokens
+            trace.append({"step": step, "stop": resp.stop_reason,
+                          "tools": [b.name for b in resp.content if b.type == "tool_use"],
+                          "tokens": spent})
+
+            if spent &gt; self.token_budget:
+                return {"status": "budget_exceeded", "trace": trace}
+            if resp.stop_reason != "tool_use":
+                text = "".join(b.text for b in resp.content if b.type == "text")
+                return {"status": "done", "output": text, "trace": trace}
+
+            messages.append({"role": "assistant", "content": resp.content})
+            messages.append({"role": "user", "content": self._execute(resp.content)})
+
+        return {"status": "step_limit", "trace": trace}</code></pre>
+<p>Three termination conditions, all explicit: the model finished, the step ceiling hit, the token budget hit. An agent with only the first is an agent that can run until your card declines.</p>
+<p>The system prompt does the planning work:</p>
+<pre><code>SYSTEM = '''You produce release notes for a repository over a date range.
+
+Work in this order: gather merged pull requests, classify each as feature, fix
+or chore and flag breaking changes, then draft the notes.
+
+Rules:
+- Call list_merged_prs exactly once per repository and date range. Do not re-fetch.
+- If the range returns more than 40 pull requests, classify in batches.
+- If a pull request title is ambiguous, call get_issue rather than guessing.
+- Stop and report when the draft is written. Do not post it.'''</code></pre>
+<div class="callout lens"><span class="tag">Exam lens</span>
+<p>Agent-construction questions look for the guards. A loop with no step ceiling, no token budget and no failure path is the wrong answer regardless of how good its prompt is. Know that a plan stated in the system prompt is guidance the model can deviate from, whereas a step ceiling in your code is a limit it cannot — which is the same distinction that separates hooks from instructions in stage 5.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">The agent completes a real task and returns a trace.</label><label><input type="checkbox">Lowering <code>max_steps</code> to 2 produces a clean <code>step_limit</code> result rather than an exception.</label><label><input type="checkbox">You can read the trace and name every step it took.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">3</div><h2>Delegate to subagents</h2></div>
+  <p class="goal">Code. Isolation of context is the real gain.</p>
+  <div class="stage-body">
+<p>Classifying forty pull requests in the main loop puts forty tool results in one window. Delegating gives each batch its own context, and only the classification comes back.</p>
+<pre><code>def classify_batch(prs):
+    '''Runs as a separate invocation with its own context window.'''
+    resp = client.messages.create(
+        model="claude-haiku-4-5",             # cheaper model, narrower task
+        max_tokens=2048,
+        system="Classify each pull request as feature, fix or chore. Flag breaking changes.",
+        tools=[CLASSIFY_TOOL],
+        tool_choice={"type": "tool", "name": "emit_classification"},
+        messages=[{"role": "user", "content": json.dumps(prs)}],
+    )
+    return next(b.input for b in resp.content if b.type == "tool_use")["items"]
+
+def classify_all(prs, size=20):
+    out = []
+    for i in range(0, len(prs), size):
+        out.extend(classify_batch(prs[i:i + size]))
+    return out                                 # only results reach the orchestrator</code></pre>
+<p>Two things happened at once. The orchestrator's context stayed small because intermediate reasoning never entered it. And the subtask ran on a cheaper model, because classification against a fixed schema does not need the orchestrator's capability.</p>
+<p>The Agent SDK provides this shape — subagents, permissions, hooks and session handling — without hand-rolling it:</p>
+<pre><code>pip install claude-agent-sdk</code></pre>
+<pre><code>from claude_agent_sdk import query
+
+async for message in query(
+    prompt="Draft release notes for sourcefuse/api since 2026-08-01",
+    options={"allowed_tools": ["Read", "Grep"], "permission_mode": "acceptEdits"},
+):
+    print(message)</code></pre>
+<p>Build one segment both ways. Hand-rolled teaches the mechanics; the SDK is what you would ship.</p>
+<div class="callout verify"><span class="tag">Verify</span>
+<p>Agent SDK package name, function signature and option names differ across versions. Check the current API before copying this call.</p>
+</div><div class="callout lens"><span class="tag">Exam lens</span>
+<p>The reason to reach for a subagent is context isolation, not parallelism — that is the distinction most often tested. Related: model tiering per subtask, where the orchestrator is the capable model and workers are cheap, is the standard cost answer for a multi-step agent. And a subagent starts with a fresh window, so anything it needs must be passed in explicitly; assuming it inherits the parent conversation is a common wrong answer.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">A subtask runs as a separate invocation and only its result reaches the orchestrator.</label><label><input type="checkbox">The subtask runs on a smaller model and quality holds.</label><label><input type="checkbox">You have run one segment through the Agent SDK.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">4</div><h2>Keep memory across a long task</h2></div>
+  <p class="goal">Code. Compaction, and what to keep outside the window.</p>
+  <div class="stage-body">
+<p>A long-running agent hits the context window. Three responses, and they are not alternatives — a real system uses all three.</p>
+<ol>
+  <li><strong>Compact.</strong> When context passes a threshold, summarise the older half and replace it, keeping the system prompt and the most recent turns verbatim.</li>
+  <li><strong>Externalise.</strong> Write durable facts to a file or store, and let the agent read them back with a tool. The window holds a pointer; the store holds the content.</li>
+  <li><strong>Scope.</strong> Give each subagent only what its task needs, so the big window is needed less often.</li>
+</ol>
+<pre><code>def compact(messages, keep_recent=6):
+    head, tail = messages[:-keep_recent], messages[-keep_recent:]
+    if len(head) &lt; 4:
+        return messages
+
+    summary = client.messages.create(
+        model="claude-haiku-4-5", max_tokens=1024,
+        system="Summarise this agent transcript. Keep decisions, findings and open "
+               "questions. Drop tool payloads and restated instructions.",
+        messages=[{"role": "user", "content": json.dumps(_serialise(head))[:60000]}],
+    ).content[0].text
+
+    return [{"role": "user", "content": f"Summary of earlier work:\n{summary}"}] + tail</code></pre>
+<p>Call it when <code>count_tokens</code> crosses a threshold rather than on a turn count, since one verbose tool result can consume more than ten short turns.</p>
+<p>Externalising is often better. Have the agent write findings to <code>notes.json</code> through a tool and read them back when needed — durable across runs, and no summarisation loss.</p>
+<div class="callout caution"><span class="tag">What compaction costs</span>
+<p>Summarising is lossy and irreversible. Detail dropped at step 20 is gone at step 40, and the agent will not know it is missing. Keep decisions and constraints verbatim; summarise narration.</p>
+</div><div class="callout lens"><span class="tag">Exam lens</span>
+<p>Context-window questions have a decision order: reduce what enters the window, then externalise, then compact — compaction last because it loses information. A scenario where an agent "forgets a constraint given at the start" points at compaction dropping it, and the fix is pinning that constraint in the system prompt where compaction cannot reach it.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">Compaction triggers on a token threshold and the run continues coherently.</label><label><input type="checkbox">One durable fact survives via an external store rather than the window.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">5</div><h2>Enforce rules with hooks, not requests</h2></div>
+  <p class="goal">Code plus configuration. Where safety stops being advisory.</p>
+  <div class="stage-body">
+<p>"Never post without confirmation" in a system prompt is an instruction weighed against other instructions. A hook is code that runs before the tool call and can refuse it.</p>
+<p>In your own loop, that is a check in the executor:</p>
+<pre><code>BLOCKED = {"post_draft": lambda args: not args.get("confirmed"),
+           "delete_release": lambda args: True}
+
+def guard(name, args):
+    check = BLOCKED.get(name)
+    if check and check(args):
+        return {"allowed": False, "reason": f"{name} requires explicit confirmation"}
+    return {"allowed": True}</code></pre>
+<p>Refused calls come back as a <code>tool_result</code> with <code>is_error</code>, so the agent learns it was blocked and can ask rather than failing opaquely.</p>
+<p>In Claude Code the same idea is configuration. A <code>PreToolUse</code> hook receives the pending call and can block it; a <code>PostToolUse</code> hook runs after — formatting, linting, audit logging. Hooks live in settings alongside permissions, and <code>CLAUDE.md</code> carries project conventions into every session.</p>
+<p>Try it: add a <code>PreToolUse</code> hook that blocks writes to <code>.env</code>, then ask Claude Code to edit that file and watch the refusal.</p>
+<table>
+  <tr><th>Mechanism</th><th>Enforcement</th><th>Right for</th></tr>
+  <tr><td>System prompt</td><td>Advisory</td><td>Tone, style, preferred approach</td></tr>
+  <tr><td>Tool schema</td><td>Structural</td><td>Shape and type of arguments</td></tr>
+  <tr><td>Permissions / allowed tools</td><td>Hard</td><td>Which tools exist for this session at all</td></tr>
+  <tr><td>Hook</td><td>Hard, conditional</td><td>Rules depending on arguments or state</td></tr>
+</table>
+<div class="callout lens"><span class="tag">Exam lens</span>
+<p>The advisory-versus-enforced split answers most safety questions. Anything that must never happen belongs in a hook or a permission, not in a prompt. Know the two hook positions — before a tool call, where blocking is possible, and after, where it is not — and that Claude Code sits in the exam at a small weight, so recognising <code>CLAUDE.md</code>, settings-based permissions, hooks and headless mode is enough.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">A guarded tool is refused and the agent responds to the refusal sensibly.</label><label><input type="checkbox">A Claude Code <code>PreToolUse</code> hook blocks an edit you asked for.</label><label><input type="checkbox">You can classify each of your rules as advisory or enforced.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">6</div><h2>Evaluate the agent, not just the output</h2></div>
+  <p class="goal">Code. Multi-step systems fail in ways a final-answer check misses.</p>
+  <div class="stage-body">
+<p>An agent can produce a good answer having taken six wrong turns, and produce a bad one from a correct plan. Score both.</p>
+<p class="filename">eval_agent.py</p>
+<pre><code>CASES = [
+    {"task": "Release notes for sourcefuse/api, 2026-08-01 to 2026-08-31",
+     "expect_tools": ["list_merged_prs"], "forbid_tools": ["post_draft"],
+     "must_contain": ["breaking"]},
+    {"task": "Release notes for a repository I do not have access to",
+     "expect_tools": [], "forbid_tools": ["list_merged_prs"], "must_contain": ["not permitted"]},
+]
+
+def score(case):
+    r = agent.run(case["task"], SYSTEM)
+    used = {t for step in r["trace"] for t in step["tools"]}
+    return {
+        "completed":  r["status"] == "done",
+        "tools_ok":   set(case["expect_tools"]) &lt;= used and not (set(case["forbid_tools"]) &amp; used),
+        "content_ok": all(s in (r.get("output") or "").lower() for s in case["must_contain"]),
+        "steps":      len(r["trace"]),
+        "tokens":     r["trace"][-1]["tokens"] if r["trace"] else 0,
+    }</code></pre>
+<p>Four dimensions, and they move independently. Completion says it terminated. Tool correctness says it took a defensible path. Content says the answer is right. Steps and tokens say what it cost — a change that improves quality while doubling steps may not be an improvement.</p>
+<p>For open-ended quality, a judge model scores drafts against your style guide. Use it for prose, not for questions a set comparison answers.</p>
+<p>Run the harness on every prompt or schema change and keep the numbers. This is the artefact that lets you say a change was an improvement rather than a preference.</p>
+<div class="callout lens"><span class="tag">Exam lens</span>
+<p>Evaluation questions test layering. Deterministic assertions for anything checkable — which tools, which arguments, whether a forbidden action occurred. Judge models for open-ended text only. Cost and step counts tracked alongside quality, because an agent that gets better and triples its spend has traded, not improved. And the negative case is the one that catches an over-eager agent, which is why every suite needs one.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">The harness scores completion, tool path, content and cost separately.</label><label><input type="checkbox">A negative case confirms the agent declines an out-of-scope request.</label><label><input type="checkbox">You have before-and-after numbers for one change.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">7</div><h2>Ship it</h2></div>
+  <p class="goal">Configuration and operations. The last domain, and the one that decides whether any of this survives.</p>
+  <div class="stage-body">
+<h3>Configuration</h3>
+<p>Nothing that varies between environments belongs in code: model IDs, budgets, timeouts, allow-lists, prompt versions.</p>
+<pre><code>from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    anthropic_api_key: str                 # from env, never a default
+    model_orchestrator: str = "claude-sonnet-4-6"
+    model_worker: str = "claude-haiku-4-5"
+    max_steps: int = 12
+    token_budget: int = 120_000
+    allowed_repos: list[str] = []
+    prompt_version: str = "v3"
+
+    class Config:
+        env_file = ".env"</code></pre>
+<p>Version your prompts alongside code and record <code>prompt_version</code> in every log line. When quality moves, that field tells you which change to look at.</p>
+
+<h3>Secrets</h3>
+<p>Keys come from the environment in development and a secret manager in production. Rotate on a schedule and immediately after any suspected exposure. One key per environment and per service, so revoking one does not take down everything. Nothing calls the API directly from a browser or mobile client.</p>
+
+<h3>Observability</h3>
+<p>One structured line per agent run, and one per step: run id, prompt version, model, step count, tools used, tokens in and out, latency, terminal status. Alert on the ratio of <code>step_limit</code> and <code>budget_exceeded</code> outcomes rather than on individual failures.</p>
+
+<h3>Degradation</h3>
+<table>
+  <tr><th>Failure</th><th>Behaviour</th></tr>
+  <tr><td>Rate limited</td><td>Backoff with jitter; queue rather than drop</td></tr>
+  <tr><td>Overloaded</td><td>Retry; fall back to a smaller model if the task allows</td></tr>
+  <tr><td>Budget exceeded</td><td>Return partial work with a clear status, never silence</td></tr>
+  <tr><td>Tool unavailable</td><td>Return <code>is_error</code> so the agent can adapt</td></tr>
+  <tr><td>Bad output</td><td>Validate against the schema and retry once, then escalate</td></tr>
+</table>
+<p>Deploy the release-notes agent behind a small HTTP endpoint that takes a repository and a date range and returns the draft with its trace. Run your Lab 3 harness against the deployed endpoint rather than the local function — that is the difference between testing your code and testing your system.</p>
+<div class="callout lens"><span class="tag">Exam lens</span>
+<p>Lifecycle questions expect production hygiene: configuration external to code, prompts versioned and logged with outputs, secrets in a manager with rotation, structured logs per run, and explicit degradation. The recurring distractor is an answer that improves the prompt or the model when the described problem is operational — a system with no run logs cannot be debugged by better prompting.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">Model IDs, budgets and allow-lists come from configuration, not code.</label><label><input type="checkbox">Every run logs its prompt version, model, steps, tokens and status.</label><label><input type="checkbox">The agent runs behind an endpoint and your harness passes against it.</label></div></div>
+</section>
+
+<div class="orient">
+  <h2>Where this leaves you against the exam</h2>
+  <p>Across the three labs you have covered Applications and Integration, Model Selection and Optimisation, Prompt and Context Engineering, Tools and MCPs, Agents and Workflows, Security and Safety, Eval and Debugging, and the parts of Claude Code that carry weight.</p>
+  <p>What the labs do not cover, and the exam may: the breadth of Claude Code operation beyond hooks and permissions, deployment on cloud platforms, and the full range of MCP resource and prompt primitives. Read those in the exam guide. The most useful remaining exercise is to take the release-notes agent and rebuild it as a plain chain — the same output with none of the autonomy — then argue for one over the other. That argument is what Domain 1 tests.</p>
+</div>
+
+<div class="nav-bottom"><a class="btn-back" href="index.html?v=2026090204">&#8592; Back to dashboard</a></div>
+
+<footer>
+  <div>SF Knowledge Hub &middot; CCDV-F prep lab 3 of 3</div>
+  <div>build 2026090203</div>
+</footer>
+
+</div>
+
+<!-- Auth gate (Google SSO via redirect + email/password), same as prep pages -->
+<script>
+/* SF auth gate — Google SSO (hd: sourcefuse.com, redirect) + email/password.
+   Reuses sfcertification-grafana. PASTE the live config below per the golden rule. */
+(function () {
+const firebaseConfig = {
+  apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain: "sfcertification-grafana.firebaseapp.com",
+  projectId: "sfcertification-grafana",
+  storageBucket: "sfcertification-grafana.firebasestorage.app",
+  messagingSenderId: "227322696511",
+  appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+  const ALLOWED_DOMAIN = "sourcefuse.com";
+  const ALLOWED_EXTRA = ["ravjv2013@gmail.com"];  // TEST ONLY — remove after testing
+  // Google SSO is restricted to these admin addresses ONLY. Everyone else signs in
+  // with email/password (that path is unchanged and still uses validDomain()).
+  const ADMIN_SSO = ["jv.ravichandran@sourcefuse.com","noushin.khan@sourcefuse.com"];
+  let auth, GoogleProvider, signInRedirect, signInPopup, getRedirect, signInEmail, onAuth, signOutFn, appMod;
+  let readyCb = null;
+
+  async function initFirebase() {
+    appMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const authMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    const app = appMod.getApps().length ? appMod.getApp() : appMod.initializeApp(firebaseConfig);
+    auth = authMod.getAuth(app);
+    GoogleProvider = authMod.GoogleAuthProvider;
+    signInRedirect = (p) => authMod.signInWithRedirect(auth, p);
+    signInPopup = (p) => authMod.signInWithPopup(auth, p);
+    getRedirect = () => authMod.getRedirectResult(auth);
+    signInEmail = (e, pw) => authMod.signInWithEmailAndPassword(auth, e, pw);
+    onAuth = (cb) => authMod.onAuthStateChanged(auth, cb);
+    signOutFn = () => authMod.signOut(auth);
+  }
+  function styleTag(){return `<style>
+    .sf-auth-backdrop{position:fixed;inset:0;background:rgba(16,38,60,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+    .sf-auth-card{background:#fff;border-radius:16px;padding:30px 28px;width:100%;max-width:380px;box-shadow:0 12px 40px rgba(10,30,55,.25)}
+    .sf-auth-badge{display:inline-block;background:var(--blue,#1a6eb5);color:#fff;font-weight:700;font-size:12px;padding:4px 11px;border-radius:14px;margin-bottom:14px}
+    .sf-auth-card h2{margin:0 0 4px;font-size:20px;color:#1a2733}
+    .sf-auth-sub{margin:0 0 20px;color:#5a6b7a;font-size:14px}
+    .sf-google{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:1.5px solid #dbe3ec;border-radius:10px;padding:12px;font-size:15px;font-weight:600;color:#1a2733;cursor:pointer;font-family:inherit}
+    .sf-google:hover{background:#f7fbff;border-color:var(--blue,#1a6eb5)}
+    .sf-g{background:conic-gradient(from -45deg,#ea4335 0 25%,#fbbc05 0 50%,#34a853 0 75%,#4285f4 0);color:#fff;font-weight:800;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+    .sf-or{display:flex;align-items:center;text-align:center;color:#93a1af;font-size:12px;margin:18px 0}
+    .sf-or::before,.sf-or::after{content:"";flex:1;height:1px;background:#e2e8ef}
+    .sf-or span{padding:0 12px}
+    .sf-lbl{display:block;font-size:12.5px;font-weight:600;color:#5a6b7a;margin-bottom:5px}
+    .sf-inp{width:100%;border:1.5px solid #dbe3ec;border-radius:9px;padding:11px 12px;font-size:14.5px;margin-bottom:14px;font-family:inherit}
+    .sf-inp:focus{outline:none;border-color:var(--blue,#1a6eb5)}
+    .sf-signin{width:100%;background:var(--blue,#1a6eb5);color:#fff;border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+    .sf-signin:hover{background:var(--blue-d,#12507f)}
+    .sf-err{color:#b5341a;font-size:13px;margin-top:12px;min-height:16px}
+  </style>`;}
+  function overlayHTML(){return `
+    <div class="sf-auth-backdrop" id="sf-auth"><div class="sf-auth-card">
+      <div class="sf-auth-badge">SF Knowledge Hub</div>
+      <h2>Sign in</h2>
+      <p class="sf-auth-sub">Use your SourceFuse account to view your results.</p>
+      <button class="sf-google" id="sf-google"><span class="sf-g">G</span> Sign in with Google</button>
+      <div class="sf-or"><span>or</span></div>
+      <label class="sf-lbl">Email</label>
+      <input class="sf-inp" id="sf-email" type="email" placeholder="you@sourcefuse.com" autocomplete="username">
+      <label class="sf-lbl">Password</label>
+      <input class="sf-inp" id="sf-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+      <button class="sf-signin" id="sf-signin">Sign in</button>
+      <div class="sf-err" id="sf-err"></div>
+    </div></div>`;}
+  function fail(m){const e=document.getElementById("sf-err");if(e)e.textContent=m;}
+  function validDomain(x){if(typeof x!=="string")return false;var e=x.toLowerCase();return e.endsWith("@"+ALLOWED_DOMAIN)||ALLOWED_EXTRA.includes(e);}
+  function validGoogle(x){if(typeof x!=="string")return false;return ADMIN_SSO.includes(x.toLowerCase());}
+  function isGoogleUser(u){try{return !!(u&&u.providerData&&u.providerData.some(function(p){return p&&p.providerId==="google.com";}));}catch(_){return false;}}
+  function proceed(email){const el=document.getElementById("sf-auth");if(el)el.remove();if(readyCb)readyCb(email,signOutFn);}
+  function wireOverlay(){
+    document.getElementById("sf-google").addEventListener("click",async()=>{
+      fail("");
+      if(!signInRedirect)return fail("Auth service not ready — Google SSO needs the deployed https host. Use email/password below.");
+      const p=new GoogleProvider();p.setCustomParameters({hd:ALLOWED_DOMAIN,prompt:"select_account"});
+      // Popup avoids the cross-site redirect handshake that browsers now block.
+      if(signInPopup){
+        try{
+          console.log("[auth] starting Google popup…");
+          const r=await signInPopup(p);
+          const email=(r&&r.user&&r.user.email)||"";
+          console.log("[auth] popup result; user:",email);
+          if(!validGoogle(email)){await signOutFn();return fail("Google sign-in is restricted to admin accounts. Use email/password below.");}
+          return proceed(email);
+        }catch(e){
+          console.log("[auth] signInWithPopup failed; code:",e&&e.code,"| message:",e&&e.message);
+          const blocked=e&&(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment");
+          if(!blocked)return fail("Google sign-in couldn't complete. Use email/password below.");
+        }
+      }
+      try{
+        try{sessionStorage.setItem("sf-google-pending","1");}catch(_){}
+        console.log("[auth] popup unavailable — falling back to redirect…");
+        await signInRedirect(p);}
+      catch(e){console.log("[auth] signInWithRedirect failed; code:",e&&e.code,"| message:",e&&e.message);fail("Google sign-in couldn't start. Use email/password below.");}
+    });
+    document.getElementById("sf-signin").addEventListener("click",async()=>{
+      fail("");
+      const email=(document.getElementById("sf-email").value||"").trim();
+      const pass=document.getElementById("sf-pass").value||"";
+      console.log("[auth] sign-in clicked; email:",email,"| password length:",pass.length);
+      console.log("[auth] validDomain(email):",validDomain(email));
+      if(!validDomain(email))return fail("Email must be an @sourcefuse.com address.");
+      if(!pass)return fail("Enter your password.");
+      try{const r=await signInEmail(email,pass);console.log("[auth] signInEmail success; user:",r.user&&r.user.email);proceed((r.user&&r.user.email)||email);}
+      catch(e){console.log("[auth] signInEmail failed; code:",e&&e.code,"| message:",e&&e.message);fail("Incorrect email or password.");}
+    });
+  }
+  async function mount(onReady){
+    readyCb=onReady;
+    document.head.insertAdjacentHTML("beforeend",styleTag());
+    document.body.insertAdjacentHTML("beforeend",overlayHTML());
+    try{await initFirebase();}catch(e){fail("Auth service loading… (Google SSO needs the deployed https host).");}
+    if(getRedirect){
+      try{const res=await getRedirect();
+        console.log("[auth] getRedirectResult resolved:",res,"| user:",res&&res.user&&res.user.email);
+        if(res&&res.user){const email=res.user.email;
+          if(!validGoogle(email)){await signOutFn();fail("Google sign-in is restricted to admin accounts. Use email/password below.");}
+          else{proceed(email);return;}}
+        else if(sessionStorage.getItem("sf-google-pending")==="1"){
+          sessionStorage.removeItem("sf-google-pending");
+          console.log("[auth] redirect returned NO pending result — handshake lost (likely third-party cookie/storage blocking).");
+          fail("Google sign-in didn't complete (browser blocked the sign-in handshake). Use email/password below.");
+        }
+      }catch(e){
+        console.log("[auth] getRedirectResult error; code:",e&&e.code,"| message:",e&&e.message);
+        fail("Google sign-in didn't complete. Try again or use email/password.");
+      }
+    }
+    if(onAuth){onAuth(async(u)=>{
+      if(!u)return;
+      if(isGoogleUser(u)){
+        if(validGoogle(u.email))proceed(u.email);
+        else{console.log("[auth] non-admin Google session rejected:",u.email);await signOutFn();fail("Google sign-in is restricted to admin accounts. Use email/password below.");}
+        return;
+      }
+      if(validDomain(u.email))proceed(u.email);
+    });}
+    wireOverlay();
+  }
+  window.SFAuth={mount};
+})();
+</script>
+
+
+<!-- Lab progress — matches the deployed Type 2 course:
+     section state -> progress/{uid} (legacy collection, still in use)
+     completions   -> courseProgress/{uid} with completedOn / completedAt
+                      date+time STRINGS, which is what the admin Course
+                      Progress reader keys on. Not a boolean.
+     Reuses the DEFAULT Firebase app already initialised by the auth gate. -->
+<script type="module">
+(function(){
+  var CP_COURSE_ID = "__PASTE_COURSE_DOC_ID__";
+  var MODULE_KEY   = "ccdv-f-lab-advanced";
+  var PROGRESS_KEY = "ccdv_m3";        /* progress/{uid} field, mirrors af_m1 convention */
+  var MODULE_KEYS  = ["ccdv-f-lab-basic","ccdv-f-lab-intermediate","ccdv-f-lab-advanced"];
+  var FB = "https://www.gstatic.com/firebasejs/10.12.2/";
+
+  var boxes = [], fs = null, cpRef = null, prRef = null, courseObj = {}, user = null;
+
+  function stamp(){
+    var p = function(n){ return String(n).padStart(2,"0"); };
+    var d = new Date();
+    return { date: d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()),
+             time: p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()) };
+  }
+  function checkedIndices(){
+    var out = []; boxes.forEach(function(b,i){ if(b.checked) out.push(i); }); return out;
+  }
+  function isDone(obj, mk){
+    var m = (obj.modules||{})[mk]; return !!(m && m.completedOn);
+  }
+  function render(){
+    var done = checkedIndices().length;
+    document.getElementById('fill').style.width =
+      (boxes.length ? (done/boxes.length)*100 : 0) + '%';
+    document.getElementById('count').textContent =
+      done + ' of ' + boxes.length + ' checks done'
+      + (done === boxes.length && boxes.length ? ' · lab complete' : '');
+    boxes.forEach(function(b){ b.parentNode.classList.toggle('checked', b.checked); });
+  }
+
+  /* Section checkboxes for this lab, stored as an array of indices. */
+  function saveSections(){
+    var payload = {}; payload[PROGRESS_KEY] = checkedIndices();
+    return fs.setDoc(prRef, payload, { merge: true });
+  }
+
+  /* Stamps course start on first contact and records the current module.
+     Only writes when the stored value would actually change. */
+  function setModuleInProgress(){
+    if (courseObj.courseCompletedOn) return Promise.resolve();
+    if (isDone(courseObj, MODULE_KEY)) return Promise.resolve();
+    var needStart = !courseObj.courseStartedOn;
+    if (courseObj.moduleInProgress === MODULE_KEY && !needStart) return Promise.resolve();
+
+    var t = stamp();
+    var courseUpdate = { moduleInProgress: MODULE_KEY };
+    if (needStart) { courseUpdate.courseStartedOn = t.date; courseUpdate.courseStartedAt = t.time; }
+
+    var update = { email: user.email, name: user.displayName || user.email, courses: {} };
+    update.courses[CP_COURSE_ID] = courseUpdate;
+    courseObj.moduleInProgress = MODULE_KEY;
+    if (needStart) courseObj.courseStartedOn = t.date;
+
+    return fs.setDoc(cpRef, update, { merge: true })
+      .catch(function(e){ console.error("moduleInProgress write failed", e); });
+  }
+
+  /* Read-then-merge completion write. Preserves other courses and any module
+     already recorded, and stamps course start / course completion. */
+  function completeModule(){
+    var t = stamp();
+    return fs.getDoc(cpRef).then(function(snap){
+      var data = snap.exists() ? (snap.data()||{}) : {};
+      var obj  = (data.courses||{})[CP_COURSE_ID] || {};
+      var existing = obj.modules || {};
+
+      var courseUpdate = { modules: {} };
+      if (!obj.courseStartedOn) { courseUpdate.courseStartedOn = t.date; courseUpdate.courseStartedAt = t.time; }
+      if (!(existing[MODULE_KEY] && existing[MODULE_KEY].completedOn)) {
+        courseUpdate.modules[MODULE_KEY] = { completedOn: t.date, completedAt: t.time };
+      }
+
+      var doneAfter = function(mk){
+        return !!((existing[mk] && existing[mk].completedOn) || courseUpdate.modules[mk]);
+      };
+      if (MODULE_KEYS.every(doneAfter)) {
+        if (!obj.courseCompletedOn) { courseUpdate.courseCompletedOn = t.date; courseUpdate.courseCompletedAt = t.time; }
+        courseUpdate.moduleInProgress = null;
+      } else {
+        var next = null;
+        for (var i = 0; i < MODULE_KEYS.length; i++) {
+          if (!doneAfter(MODULE_KEYS[i])) { next = MODULE_KEYS[i]; break; }
+        }
+        courseUpdate.moduleInProgress = next;
+      }
+
+      var update = { email: user.email, name: user.displayName || user.email, courses: {} };
+      update.courses[CP_COURSE_ID] = courseUpdate;
+      courseObj = Object.assign({}, obj, courseUpdate);
+      return fs.setDoc(cpRef, update, { merge: true });
+    });
+  }
+
+  async function boot(){
+    var appMod  = await import(FB + "firebase-app.js");
+    var authMod = await import(FB + "firebase-auth.js");
+    fs          = await import(FB + "firebase-firestore.js");
+    var app = appMod.getApp();                    /* DEFAULT app, never a named one */
+    user    = authMod.getAuth(app).currentUser;
+    var db  = fs.getFirestore(app);
+    cpRef   = fs.doc(db, "courseProgress", user.uid);
+    prRef   = fs.doc(db, "progress",       user.uid);
+
+    var indices = [];
+    try {
+      var ps = await fs.getDoc(prRef);
+      if (ps.exists()) indices = (ps.data()||{})[PROGRESS_KEY] || [];
+    } catch(e){ console.error("progress read failed", e); }
+    boxes.forEach(function(b,i){ b.checked = indices.indexOf(i) !== -1; });
+
+    try {
+      var cs = await fs.getDoc(cpRef);
+      if (cs.exists()) courseObj = ((cs.data()||{}).courses||{})[CP_COURSE_ID] || {};
+    } catch(e){ console.error("courseProgress read failed", e); }
+
+    render();
+    await setModuleInProgress();
+  }
+
+  window.SFAuth.mount(async function(email, signOut){
+    document.getElementById('who').innerHTML =
+      email + ' <button class="signout" id="signout">Sign out</button>';
+    var so = document.getElementById('signout');
+    if (so && signOut) so.onclick = function(){ signOut().then(function(){ location.reload(); }); };
+
+    boxes = Array.prototype.slice.call(document.querySelectorAll('.done input[type=checkbox]'));
+
+    try { await boot(); }
+    catch(e){ console.error("[progress] running in-page only:", e); render(); }
+
+    boxes.forEach(function(b){
+      b.addEventListener('change', async function(){
+        render();
+        if (!fs) return;
+        try {
+          await saveSections();
+          if (boxes.every(function(x){ return x.checked; }) && !isDone(courseObj, MODULE_KEY)) {
+            await completeModule();
+          }
+        } catch(e){ console.error("[progress] save failed:", e); }
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
