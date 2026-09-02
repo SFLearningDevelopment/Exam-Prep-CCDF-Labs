@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026090204 -->
+<!-- build: 2026090214 -->
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Claude CCDV-F Hands-on Labs — SF Knowledge Hub</title>
@@ -56,7 +56,7 @@ body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-ser
   </div>
   <div class="hero">
     <h1>Hands-on Lab Track</h1>
-    <p>Three build-along labs on the Claude API, covering all eight CCDV-F exam domains. Python throughout, with TypeScript shown for the key calls. You will need your own Anthropic API key; budget a few dollars across the set. Your stage checks are saved to your account.</p>
+    <p>Three build-along labs on the Claude API, covering all eight CCDV-F exam domains. Python throughout, with TypeScript shown for the key calls. You will need your own Anthropic API key. Every script prints a running spend meter; the whole set costs about $4 if you keep to the models the labs specify. Your stage checks are saved to your account.</p>
   </div>
   <div class="overall" id="overall" style="display:none"></div>
   <div class="grid" id="grid">
@@ -216,26 +216,26 @@ const firebaseConfig = {
 <!-- Dashboard: reads courseProgress/{uid} completions + progress/{uid} section state -->
 <script type="module">
 (function(){
-  var BUILD="2026090204";
+  var BUILD="2026090214";
   var CP_COURSE_ID="ft41kBlxJNeGtM8A6FKH";
   var FB="https://www.gstatic.com/firebasejs/10.12.2/";
 
   var LABS=[
-    { key:"ccdv-f-lab-basic", pkey:"ccdv_m1", checks:16, tag:"BASIC", tagClass:"tag-basic",
+    { key:"ccdv-f-lab-basic", pkey:"ccdv_m1", checks:17, tag:"BASIC", tagClass:"tag-basic",
       name:"Lab 1 \u2014 Call Claude properly",
       desc:"Messages API mechanics, multi-turn state, streaming, schema-forced output, token accounting, model choice on evidence, and production error handling.",
       domains:"Domains 2, 5, 6", time:"2\u20132.5 hrs",
-      file:"ccdv-f-lab-basic.html", build:"2026090201", boxLabel:"Lab 1" },
+      file:"ccdv-f-lab-basic.html", build:"2026090211", boxLabel:"Lab 1" },
     { key:"ccdv-f-lab-intermediate", pkey:"ccdv_m2", checks:17, tag:"INTERMEDIATE", tagClass:"tag-inter",
       name:"Lab 2 \u2014 Give Claude tools",
       desc:"Tool schemas, the tool result loop, parallel calls, injection defence in the architecture, context growth you can measure, and an MCP server.",
       domains:"Domains 8, 6, 7, 4", time:"3\u20133.5 hrs",
-      file:"ccdv-f-lab-intermediate.html", build:"2026090202", boxLabel:"Lab 2" },
+      file:"ccdv-f-lab-intermediate.html", build:"2026090212", boxLabel:"Lab 2" },
     { key:"ccdv-f-lab-advanced", pkey:"ccdv_m3", checks:19, tag:"ADVANCED", tagClass:"tag-adv",
       name:"Lab 3 \u2014 Build and ship an agent",
       desc:"Pattern choice, an agent loop with budgets and traces, subagents, memory and compaction, hooks as enforcement, evaluation, and shipping.",
       domains:"Domains 1, 2, 3, 4, 5, 7", time:"3.5\u20134 hrs",
-      file:"ccdv-f-lab-advanced.html", build:"2026090203", boxLabel:"Lab 3" }
+      file:"ccdv-f-lab-advanced.html", build:"2026090213", boxLabel:"Lab 3" }
   ];
 
   function pctClass(p){return p>=70?"good":p>=50?"mid":"low";}
