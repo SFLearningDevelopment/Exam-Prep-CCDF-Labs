@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026090202 -->
+<!-- build: 2026090212 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -106,11 +106,11 @@ footer{border-top:1px solid var(--rule);margin-top:40px;padding-top:18px;
 
 <header class="masthead">
   <div class="wrap">
-    <p class="crumb"><span id="who" class="who"></span><a class="back" href="index.html?v=2026090204">&#8592; Dashboard</a> &middot; SF Knowledge Hub &middot; Claude Certified Developer &ndash; Foundations (CCDV-F) prep</p>
+    <p class="crumb"><span id="who" class="who"></span><a class="back" href="index.html?v=2026090214">&#8592; Dashboard</a> &middot; SF Knowledge Hub &middot; Claude Certified Developer &ndash; Foundations (CCDV-F) prep</p>
     <p><span class="chip">Lab 2 &middot; Intermediate</span></p>
     <h1>Give Claude tools</h1>
     <p class="deck">Tool definitions, the tool result loop, parallel calls, injection defence at the architecture rather than the prompt, context growth you can measure, an MCP server, and a regression harness for tool selection.</p>
-    <div class="facts"><div><b>Language</b>Python (TypeScript shown)</div><div><b>Time</b>3&ndash;3.5 hours</div><div><b>Cost</b>Roughly $2 in API usage</div><div><b>Exam domains</b>8, 6, 7, 4</div><div><b>You need</b>Lab 1 finished</div></div>
+    <div class="facts"><div><b>Language</b>Python (TypeScript shown)</div><div><b>Time</b>3&ndash;3.5 hours</div><div><b>Cost</b>About $1 if you default to Haiku</div><div><b>Exam domains</b>8, 6, 7, 4</div><div><b>You need</b>Lab 1 finished</div></div>
   </div>
 </header>
 
@@ -223,7 +223,7 @@ footer{border-top:1px solid var(--rule);margin-top:40px;padding-top:18px;
 <p>The description does three jobs: what the tool does, when to use it, and when not to. That last clause is what stops the model reaching for this tool when a narrower one fits — the single most common cause of wrong tool selection.</p>
 <p>Now make one call and read the response rather than executing anything:</p>
 <pre><code>resp = client.messages.create(
-    model="claude-sonnet-4-6", max_tokens=1024, tools=[LIST_PRS],
+    model="claude-sonnet-5", max_tokens=1024, tools=[LIST_PRS],
     messages=[{"role": "user", "content": "What shipped in sourcefuse/api last week?"}],
 )
 print(resp.stop_reason)                     # tool_use
@@ -238,14 +238,14 @@ for block in resp.content:
   <div class="stage-head"><div class="num">2</div><h2>Close the loop</h2></div>
   <p class="goal">Code. Execute, return the result, and let the model continue.</p>
   <div class="stage-body">
-<p>The loop is short, and getting it exactly right matters more than its length.</p>
+<p>The loop is short, and getting it exactly right matters more than its length. Note the default model: tool selection is a task Haiku handles well, and the loop re-sends the whole conversation every turn, so the model you pick here is multiplied by the number of steps. Move to Sonnet only if you see it choose wrongly.</p>
 <p class="filename">loop.py</p>
-<pre><code>def run(user_text, tools, registry, model="claude-sonnet-4-6", max_turns=8):
+<pre><code>def run(user_text, tools, registry, model="claude-haiku-4-5", max_turns=6):
     messages = [{"role": "user", "content": user_text}]
 
     for _ in range(max_turns):
         resp = client.messages.create(
-            model=model, max_tokens=2048, tools=tools, messages=messages,
+            model=model, max_tokens=1500, tools=tools, messages=messages,
         )
 
         if resp.stop_reason != "tool_use":
@@ -316,12 +316,12 @@ def list_merged_prs(repo: str, since: str, until: str):
 </table>
 <pre><code>def context_size(messages):
     return client.messages.count_tokens(
-        model="claude-sonnet-4-6", tools=TOOLS, messages=messages
+        model="claude-sonnet-5", tools=TOOLS, messages=messages
     ).input_tokens
 
 # instrument the loop
 print("turn", i, "context tokens:", context_size(messages))</code></pre>
-<p>Print that on each iteration of your Lab 2 loop. Seeing the curve is the point of the stage — one verbose tool returning full JSON payloads can double the context in a single step.</p>
+<p>Cache the stable prefix once you have more than two tools: tool schemas are large, unchanging within a run, and re-sent on every turn, which makes them the single best caching candidate in this lab. Print the context size on each iteration of your loop. Seeing the curve is the point of the stage — one verbose tool returning full JSON payloads can double the context in a single step.</p>
 <div class="callout lens"><span class="tag">Exam lens</span>
 <p>Context engineering and prompt engineering are separate domains for a reason. Prompt engineering is what you say; context engineering is what occupies the window and in what order. Expect scenarios about a long-running agent whose costs climb or whose early instructions stop being followed — the answers are trimming tool output, caching stable prefixes, and compacting history, not a bigger context window.</p>
 </div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">You have a context-token number per turn for one multi-step run.</label><label><input type="checkbox">Trimming one tool's return payload measurably reduces the total.</label></div></div>
@@ -402,7 +402,7 @@ if __name__ == "__main__":
 
 def first_tool(question):
     resp = client.messages.create(
-        model="claude-sonnet-4-6", max_tokens=1024, tools=TOOLS,
+        model="claude-sonnet-5", max_tokens=1024, tools=TOOLS,
         messages=[{"role": "user", "content": question}],
     )
     picked = [b.name for b in resp.content if b.type == "tool_use"]
@@ -422,11 +422,11 @@ print(f"{passed}/{len(CASES)} selected correctly")</code></pre>
   <p>You now have tools, a loop, and a way to tell when the loop is wrong. Lab 3 turns that into an agent: multi-step planning, subagents, memory across long tasks, hooks as deterministic enforcement, and the operational work of shipping it. The tool loop you wrote here is the foundation the Agent SDK builds on, which is why writing it by hand first is worth the hour.</p>
 </div>
 
-<div class="nav-bottom"><a class="btn-back" href="index.html?v=2026090204">&#8592; Back to dashboard</a></div>
+<div class="nav-bottom"><a class="btn-back" href="index.html?v=2026090214">&#8592; Back to dashboard</a></div>
 
 <footer>
   <div>SF Knowledge Hub &middot; CCDV-F prep lab 2 of 3</div>
-  <div>build 2026090202</div>
+  <div>build 2026090212</div>
 </footer>
 
 </div>
