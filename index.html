@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<!-- build: 2026090204 -->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claude CCDV-F Hands-on Labs — SF Knowledge Hub</title>
+<style>
+:root{--blue:#3f4b8f;--blue-d:#2c3667;--ink:#1a2733;--mut:#5a6b7a;--line:#e2e8ef;--ok:#127a3e;--no:#b5341a;--amber:#8a5a00;--bg:#f5f8fb;}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.badge{background:var(--blue);color:#fff;font-weight:700;font-size:13px;padding:5px 12px;border-radius:20px;letter-spacing:.3px}
+.head small{color:var(--mut)}
+.user{margin-left:auto;font-size:12.5px;color:var(--mut);display:flex;align-items:center;gap:10px}
+.signout{background:none;border:0;color:var(--blue);font-size:12.5px;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0}
+.hero{margin:14px 0 22px}
+.hero h1{font-size:24px;margin:0 0 6px}
+.hero p{color:var(--mut);margin:0;font-size:14.5px}
+.overall{display:flex;gap:14px;margin-bottom:22px}
+.overall .card{flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
+.overall .n{font-size:22px;font-weight:800;color:var(--blue)}
+.overall .l{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:680px){.grid{grid-template-columns:1fr}}
+.grid .box:nth-child(3):last-child{grid-column:1 / -1;max-width:calc(50% - 10px);justify-self:center;width:100%}
+@media(max-width:680px){.grid .box:nth-child(3):last-child{max-width:none}}
+.box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 1px 3px rgba(20,50,80,.05);display:flex;flex-direction:column}
+.box-tag{display:inline-block;align-self:flex-start;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:12px;margin-bottom:10px}
+.tag-basic{color:#25562a;background:#e9f2e9}
+.tag-inter{color:#0f4d56;background:#e4eff1}
+.tag-adv{color:#3b2f79;background:#eceaf7}
+.box h2{font-size:17px;margin:0 0 4px}
+.box .desc{color:var(--mut);font-size:13.5px;margin:0 0 14px}
+.meta{font-size:12.5px;color:var(--mut);margin:0 0 14px}
+.meta span{display:inline-block;margin-right:14px}
+.stats{background:var(--bg);border-radius:10px;padding:14px 16px;margin-bottom:16px}
+.stats-empty{color:var(--mut);font-size:13.5px;text-align:center;padding:8px 0}
+.track{height:8px;background:#e6edf4;border-radius:5px;overflow:hidden;margin:4px 0 10px}
+.track i{display:block;height:100%;background:var(--blue);border-radius:5px}
+.stat-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px}
+.stat-row .pct{font-weight:700}
+.pct.good{color:var(--ok)}.pct.mid{color:var(--amber)}.pct.low{color:var(--no)}
+.status{font-size:12.5px;font-weight:700}
+.status.done{color:var(--ok)}
+.launch{margin-top:auto;background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:inherit;text-align:center;text-decoration:none;display:block}
+.launch:hover{background:var(--blue-d)}
+.foot{text-align:center;color:var(--mut);font-size:12px;margin-top:28px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <span class="badge">CCDV-F</span>
+    <small>Claude Certified Developer – Foundations · Hands-on labs</small>
+    <span class="user" id="user"></span>
+  </div>
+  <div class="hero">
+    <h1>Hands-on Lab Track</h1>
+    <p>Three build-along labs on the Claude API, covering all eight CCDV-F exam domains. Python throughout, with TypeScript shown for the key calls. You will need your own Anthropic API key; budget a few dollars across the set. Your stage checks are saved to your account.</p>
+  </div>
+  <div class="overall" id="overall" style="display:none"></div>
+  <div class="grid" id="grid">
+    <p class="stats-empty">Sign in to see your progress…</p>
+  </div>
+  <div class="foot">
+    Original lab material aligned to the CCDV-F exam domains (Exam Guide v1.0, July 2026 — verify current weights before relying on them). For internal SF Knowledge Hub use only.
+  </div>
+</div>
+
+<!-- Auth gate (Google SSO via redirect + email/password), same as prep pages -->
+<script>
+/* SF auth gate — Google SSO (hd: sourcefuse.com, redirect) + email/password.
+   Reuses sfcertification-grafana. PASTE the live config below per the golden rule. */
+(function () {
+const firebaseConfig = {
+  apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain: "sfcertification-grafana.firebaseapp.com",
+  projectId: "sfcertification-grafana",
+  storageBucket: "sfcertification-grafana.firebasestorage.app",
+  messagingSenderId: "227322696511",
+  appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+  const ALLOWED_DOMAIN = "sourcefuse.com";
+  const ALLOWED_EXTRA = ["ravjv2013@gmail.com"];  // TEST ONLY — remove after testing
+  // Google SSO is restricted to these admin addresses ONLY. Everyone else signs in
+  // with email/password (that path is unchanged and still uses validDomain()).
+  const ADMIN_SSO = ["jv.ravichandran@sourcefuse.com","noushin.khan@sourcefuse.com"];
+  let auth, GoogleProvider, signInRedirect, signInPopup, getRedirect, signInEmail, onAuth, signOutFn, appMod;
+  let readyCb = null;
+
+  async function initFirebase() {
+    appMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const authMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    const app = appMod.getApps().length ? appMod.getApp() : appMod.initializeApp(firebaseConfig);
+    auth = authMod.getAuth(app);
+    GoogleProvider = authMod.GoogleAuthProvider;
+    signInRedirect = (p) => authMod.signInWithRedirect(auth, p);
+    signInPopup = (p) => authMod.signInWithPopup(auth, p);
+    getRedirect = () => authMod.getRedirectResult(auth);
+    signInEmail = (e, pw) => authMod.signInWithEmailAndPassword(auth, e, pw);
+    onAuth = (cb) => authMod.onAuthStateChanged(auth, cb);
+    signOutFn = () => authMod.signOut(auth);
+  }
+  function styleTag(){return `<style>
+    .sf-auth-backdrop{position:fixed;inset:0;background:rgba(16,38,60,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+    .sf-auth-card{background:#fff;border-radius:16px;padding:30px 28px;width:100%;max-width:380px;box-shadow:0 12px 40px rgba(10,30,55,.25)}
+    .sf-auth-badge{display:inline-block;background:var(--blue,#1a6eb5);color:#fff;font-weight:700;font-size:12px;padding:4px 11px;border-radius:14px;margin-bottom:14px}
+    .sf-auth-card h2{margin:0 0 4px;font-size:20px;color:#1a2733}
+    .sf-auth-sub{margin:0 0 20px;color:#5a6b7a;font-size:14px}
+    .sf-google{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:1.5px solid #dbe3ec;border-radius:10px;padding:12px;font-size:15px;font-weight:600;color:#1a2733;cursor:pointer;font-family:inherit}
+    .sf-google:hover{background:#f7fbff;border-color:var(--blue,#1a6eb5)}
+    .sf-g{background:conic-gradient(from -45deg,#ea4335 0 25%,#fbbc05 0 50%,#34a853 0 75%,#4285f4 0);color:#fff;font-weight:800;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+    .sf-or{display:flex;align-items:center;text-align:center;color:#93a1af;font-size:12px;margin:18px 0}
+    .sf-or::before,.sf-or::after{content:"";flex:1;height:1px;background:#e2e8ef}
+    .sf-or span{padding:0 12px}
+    .sf-lbl{display:block;font-size:12.5px;font-weight:600;color:#5a6b7a;margin-bottom:5px}
+    .sf-inp{width:100%;border:1.5px solid #dbe3ec;border-radius:9px;padding:11px 12px;font-size:14.5px;margin-bottom:14px;font-family:inherit}
+    .sf-inp:focus{outline:none;border-color:var(--blue,#1a6eb5)}
+    .sf-signin{width:100%;background:var(--blue,#1a6eb5);color:#fff;border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+    .sf-signin:hover{background:var(--blue-d,#12507f)}
+    .sf-err{color:#b5341a;font-size:13px;margin-top:12px;min-height:16px}
+  </style>`;}
+  function overlayHTML(){return `
+    <div class="sf-auth-backdrop" id="sf-auth"><div class="sf-auth-card">
+      <div class="sf-auth-badge">SF Knowledge Hub</div>
+      <h2>Sign in</h2>
+      <p class="sf-auth-sub">Use your SourceFuse account to view your results.</p>
+      <button class="sf-google" id="sf-google"><span class="sf-g">G</span> Sign in with Google</button>
+      <div class="sf-or"><span>or</span></div>
+      <label class="sf-lbl">Email</label>
+      <input class="sf-inp" id="sf-email" type="email" placeholder="you@sourcefuse.com" autocomplete="username">
+      <label class="sf-lbl">Password</label>
+      <input class="sf-inp" id="sf-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+      <button class="sf-signin" id="sf-signin">Sign in</button>
+      <div class="sf-err" id="sf-err"></div>
+    </div></div>`;}
+  function fail(m){const e=document.getElementById("sf-err");if(e)e.textContent=m;}
+  function validDomain(x){if(typeof x!=="string")return false;var e=x.toLowerCase();return e.endsWith("@"+ALLOWED_DOMAIN)||ALLOWED_EXTRA.includes(e);}
+  function validGoogle(x){if(typeof x!=="string")return false;return ADMIN_SSO.includes(x.toLowerCase());}
+  function isGoogleUser(u){try{return !!(u&&u.providerData&&u.providerData.some(function(p){return p&&p.providerId==="google.com";}));}catch(_){return false;}}
+  function proceed(email){const el=document.getElementById("sf-auth");if(el)el.remove();if(readyCb)readyCb(email,signOutFn);}
+  function wireOverlay(){
+    document.getElementById("sf-google").addEventListener("click",async()=>{
+      fail("");
+      if(!signInRedirect)return fail("Auth service not ready — Google SSO needs the deployed https host. Use email/password below.");
+      const p=new GoogleProvider();p.setCustomParameters({hd:ALLOWED_DOMAIN,prompt:"select_account"});
+      // Popup avoids the cross-site redirect handshake that browsers now block.
+      if(signInPopup){
+        try{
+          console.log("[auth] starting Google popup…");
+          const r=await signInPopup(p);
+          const email=(r&&r.user&&r.user.email)||"";
+          console.log("[auth] popup result; user:",email);
+          if(!validGoogle(email)){await signOutFn();return fail("Google sign-in is restricted to admin accounts. Use email/password below.");}
+          return proceed(email);
+        }catch(e){
+          console.log("[auth] signInWithPopup failed; code:",e&&e.code,"| message:",e&&e.message);
+          const blocked=e&&(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment");
+          if(!blocked)return fail("Google sign-in couldn't complete. Use email/password below.");
+        }
+      }
+      try{
+        try{sessionStorage.setItem("sf-google-pending","1");}catch(_){}
+        console.log("[auth] popup unavailable — falling back to redirect…");
+        await signInRedirect(p);}
+      catch(e){console.log("[auth] signInWithRedirect failed; code:",e&&e.code,"| message:",e&&e.message);fail("Google sign-in couldn't start. Use email/password below.");}
+    });
+    document.getElementById("sf-signin").addEventListener("click",async()=>{
+      fail("");
+      const email=(document.getElementById("sf-email").value||"").trim();
+      const pass=document.getElementById("sf-pass").value||"";
+      console.log("[auth] sign-in clicked; email:",email,"| password length:",pass.length);
+      console.log("[auth] validDomain(email):",validDomain(email));
+      if(!validDomain(email))return fail("Email must be an @sourcefuse.com address.");
+      if(!pass)return fail("Enter your password.");
+      try{const r=await signInEmail(email,pass);console.log("[auth] signInEmail success; user:",r.user&&r.user.email);proceed((r.user&&r.user.email)||email);}
+      catch(e){console.log("[auth] signInEmail failed; code:",e&&e.code,"| message:",e&&e.message);fail("Incorrect email or password.");}
+    });
+  }
+  async function mount(onReady){
+    readyCb=onReady;
+    document.head.insertAdjacentHTML("beforeend",styleTag());
+    document.body.insertAdjacentHTML("beforeend",overlayHTML());
+    try{await initFirebase();}catch(e){fail("Auth service loading… (Google SSO needs the deployed https host).");}
+    if(getRedirect){
+      try{const res=await getRedirect();
+        console.log("[auth] getRedirectResult resolved:",res,"| user:",res&&res.user&&res.user.email);
+        if(res&&res.user){const email=res.user.email;
+          if(!validGoogle(email)){await signOutFn();fail("Google sign-in is restricted to admin accounts. Use email/password below.");}
+          else{proceed(email);return;}}
+        else if(sessionStorage.getItem("sf-google-pending")==="1"){
+          sessionStorage.removeItem("sf-google-pending");
+          console.log("[auth] redirect returned NO pending result — handshake lost (likely third-party cookie/storage blocking).");
+          fail("Google sign-in didn't complete (browser blocked the sign-in handshake). Use email/password below.");
+        }
+      }catch(e){
+        console.log("[auth] getRedirectResult error; code:",e&&e.code,"| message:",e&&e.message);
+        fail("Google sign-in didn't complete. Try again or use email/password.");
+      }
+    }
+    if(onAuth){onAuth(async(u)=>{
+      if(!u)return;
+      if(isGoogleUser(u)){
+        if(validGoogle(u.email))proceed(u.email);
+        else{console.log("[auth] non-admin Google session rejected:",u.email);await signOutFn();fail("Google sign-in is restricted to admin accounts. Use email/password below.");}
+        return;
+      }
+      if(validDomain(u.email))proceed(u.email);
+    });}
+    wireOverlay();
+  }
+  window.SFAuth={mount};
+})();
+</script>
+
+<!-- Dashboard: reads courseProgress/{uid} completions + progress/{uid} section state -->
+<script type="module">
+(function(){
+  var BUILD="2026090204";
+  var CP_COURSE_ID="__PASTE_COURSE_DOC_ID__";
+  var FB="https://www.gstatic.com/firebasejs/10.12.2/";
+
+  var LABS=[
+    { key:"ccdv-f-lab-basic", pkey:"ccdv_m1", checks:16, tag:"BASIC", tagClass:"tag-basic",
+      name:"Lab 1 \u2014 Call Claude properly",
+      desc:"Messages API mechanics, multi-turn state, streaming, schema-forced output, token accounting, model choice on evidence, and production error handling.",
+      domains:"Domains 2, 5, 6", time:"2\u20132.5 hrs",
+      file:"ccdv-f-lab-basic.html", build:"2026090201", boxLabel:"Lab 1" },
+    { key:"ccdv-f-lab-intermediate", pkey:"ccdv_m2", checks:17, tag:"INTERMEDIATE", tagClass:"tag-inter",
+      name:"Lab 2 \u2014 Give Claude tools",
+      desc:"Tool schemas, the tool result loop, parallel calls, injection defence in the architecture, context growth you can measure, and an MCP server.",
+      domains:"Domains 8, 6, 7, 4", time:"3\u20133.5 hrs",
+      file:"ccdv-f-lab-intermediate.html", build:"2026090202", boxLabel:"Lab 2" },
+    { key:"ccdv-f-lab-advanced", pkey:"ccdv_m3", checks:19, tag:"ADVANCED", tagClass:"tag-adv",
+      name:"Lab 3 \u2014 Build and ship an agent",
+      desc:"Pattern choice, an agent loop with budgets and traces, subagents, memory and compaction, hooks as enforcement, evaluation, and shipping.",
+      domains:"Domains 1, 2, 3, 4, 5, 7", time:"3.5\u20134 hrs",
+      file:"ccdv-f-lab-advanced.html", build:"2026090203", boxLabel:"Lab 3" }
+  ];
+
+  function pctClass(p){return p>=70?"good":p>=50?"mid":"low";}
+
+  function boxHTML(lab,state){
+    var done=state.done, total=lab.checks, complete=state.complete;
+    var pct=total?Math.round(done/total*100):0;
+    var html='';
+    html+='<div class="box">';
+    html+='<span class="box-tag '+lab.tagClass+'">'+lab.tag+'</span>';
+    html+='<h2>'+lab.name+'</h2>';
+    html+='<p class="desc">'+lab.desc+'</p>';
+    html+='<p class="meta"><span>'+lab.domains+'</span><span>'+lab.time+'</span></p>';
+    if(!done && !complete){
+      html+='<div class="stats"><div class="stats-empty">Not started. Launch the lab to begin.</div></div>';
+    }else{
+      html+='<div class="stats">';
+      html+='<div class="track"><i style="width:'+(complete?100:pct)+'%"></i></div>';
+      html+='<div class="stat-row"><span>'+(complete
+             ? 'Completed '+state.completedOn
+             : done+' of '+total+' stage checks')+'</span>';
+      html+='<span>'+(complete
+             ? '<span class="status done">Complete</span>'
+             : '<span class="pct '+pctClass(pct)+'">'+pct+'%</span>')+'</span></div>';
+      html+='</div>';
+    }
+    html+='<a class="launch" href="'+lab.file+'?v='+(lab.build||BUILD)+'">'
+        +(complete?'Review '+lab.boxLabel:(done?'Continue '+lab.boxLabel:'Launch '+lab.boxLabel))+' \u2192</a>';
+    html+='</div>';
+    return html;
+  }
+
+  function overallHTML(states,courseObj){
+    var started=0,complete=0,done=0,total=0;
+    LABS.forEach(function(l){
+      var st=states[l.key];
+      if(st.done||st.complete)started++;
+      if(st.complete)complete++;
+      done+=st.complete?l.checks:st.done; total+=l.checks;
+    });
+    var pct=total?Math.round(done/total*100):0;
+    var cert=courseObj.courseCompletedOn
+      ? '<div class="card"><div class="n">\u2713</div><div class="l">Track done '+courseObj.courseCompletedOn+'</div></div>'
+      : '<div class="card"><div class="n">'+pct+'%</div><div class="l">Track progress</div></div>';
+    return '<div class="card"><div class="n">'+started+'/'+LABS.length+'</div><div class="l">Started</div></div>'
+         + '<div class="card"><div class="n">'+complete+'/'+LABS.length+'</div><div class="l">Completed</div></div>'
+         + cert;
+  }
+
+  async function loadState(){
+    var appMod=await import(FB+"firebase-app.js");
+    var authMod=await import(FB+"firebase-auth.js");
+    var fs=await import(FB+"firebase-firestore.js");
+    var app=appMod.getApp();
+    var uid=authMod.getAuth(app).currentUser.uid;
+    var db=fs.getFirestore(app);
+
+    var courseObj={}, sections={};
+    try{
+      var cs=await fs.getDoc(fs.doc(db,"courseProgress",uid));
+      if(cs.exists())courseObj=((cs.data()||{}).courses||{})[CP_COURSE_ID]||{};
+    }catch(e){console.error("courseProgress read failed",e);}
+    try{
+      var ps=await fs.getDoc(fs.doc(db,"progress",uid));
+      if(ps.exists())sections=ps.data()||{};
+    }catch(e){console.error("progress read failed",e);}
+
+    var states={};
+    LABS.forEach(function(l){
+      var m=(courseObj.modules||{})[l.key]||{};
+      var idx=sections[l.pkey]||[];
+      states[l.key]={done:idx.length,complete:!!m.completedOn,completedOn:m.completedOn||""};
+    });
+    return {states:states,courseObj:courseObj};
+  }
+
+  window.SFAuth.mount(async function(email,signOut){
+    var u=document.getElementById("user");
+    u.innerHTML=email+' <button class="signout" id="signout">Sign out</button>';
+    var so=document.getElementById("signout");
+    if(so&&signOut)so.onclick=function(){signOut().then(function(){location.reload();});};
+
+    var res={states:{},courseObj:{}};
+    try{res=await loadState();}
+    catch(e){
+      console.error("[dashboard] progress unavailable:",e);
+      LABS.forEach(function(l){res.states[l.key]={done:0,complete:false,completedOn:""};});
+    }
+
+    document.getElementById("grid").innerHTML=
+      LABS.map(function(l){return boxHTML(l,res.states[l.key]);}).join("");
+
+    var ov=document.getElementById("overall");
+    ov.innerHTML=overallHTML(res.states,res.courseObj);
+    ov.style.display="flex";
+  });
+})();
+</script>
+</body></html>
