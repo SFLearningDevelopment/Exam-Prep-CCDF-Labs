@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026090201 -->
+<!-- build: 2026090211 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -106,11 +106,11 @@ footer{border-top:1px solid var(--rule);margin-top:40px;padding-top:18px;
 
 <header class="masthead">
   <div class="wrap">
-    <p class="crumb"><span id="who" class="who"></span><a class="back" href="index.html?v=2026090204">&#8592; Dashboard</a> &middot; SF Knowledge Hub &middot; Claude Certified Developer &ndash; Foundations (CCDV-F) prep</p>
+    <p class="crumb"><span id="who" class="who"></span><a class="back" href="index.html?v=2026090214">&#8592; Dashboard</a> &middot; SF Knowledge Hub &middot; Claude Certified Developer &ndash; Foundations (CCDV-F) prep</p>
     <p><span class="chip">Lab 1 &middot; Basic</span></p>
     <h1>Call Claude properly</h1>
     <p class="deck">Build a release-notes assistant on the Messages API: system prompts, multi-turn state, streaming, schema-forced output, token accounting, model choice on evidence, and the failures that only appear in production.</p>
-    <div class="facts"><div><b>Language</b>Python (TypeScript shown)</div><div><b>Time</b>2&ndash;2.5 hours</div><div><b>Cost</b>Roughly $1 in API usage</div><div><b>Exam domains</b>2, 5, 6, part of 7</div><div><b>You need</b>Python 3.10+, an Anthropic API key</div></div>
+    <div class="facts"><div><b>Language</b>Python (TypeScript shown)</div><div><b>Time</b>2&ndash;2.5 hours</div><div><b>Cost</b>About $0.40 with the meter on</div><div><b>Exam domains</b>2, 5, 6, part of 7</div><div><b>You need</b>Python 3.10+, an Anthropic API key</div></div>
   </div>
 </header>
 
@@ -231,9 +231,63 @@ const resp = await client.messages.create({
   system: "You write concise release notes for a developer audience.",
   messages: [{ role: "user", content: "Summarise: 'fix: retry on 429'" }],
 });</code></pre>
-<div class="callout lens"><span class="tag">Exam lens</span>
+
+<h3>A running spend meter</h3>
+<p>Before going further, build the thing that tells you what every call costs. You will use it in all three labs.</p>
+<p class="filename">cost.py</p>
+<pre><code>'''Running spend meter. Import this in every lab script.'''
+
+# USD per million tokens. Verify against the current price sheet before trusting.
+PRICES = {
+    "claude-haiku-4-5": (1.00, 5.00),
+    "claude-sonnet-5":  (2.00, 10.00),
+    "claude-opus-5":    (5.00, 25.00),
+}
+CACHE_WRITE_MULT = 1.25      # 5-minute cache write
+CACHE_READ_MULT  = 0.10      # cache hit
+
+_session_total = 0.0
+_calls = 0
+
+def record(model, usage, label=""):
+    global _session_total, _calls
+    base_in, base_out = PRICES.get(model, (2.00, 10.00))
+
+    cache_w = getattr(usage, "cache_creation_input_tokens", 0) or 0
+    cache_r = getattr(usage, "cache_read_input_tokens", 0) or 0
+
+    cost = (
+        usage.input_tokens  * base_in
+        + usage.output_tokens * base_out
+        + cache_w * base_in * CACHE_WRITE_MULT
+        + cache_r * base_in * CACHE_READ_MULT
+    ) / 1_000_000
+
+    _session_total += cost
+    _calls += 1
+    print(f"[spend] {label or model:28} "
+          f"in={usage.input_tokens:6} out={usage.output_tokens:5} "
+          f"cache_r={cache_r:6} "
+          f"${cost:.5f}  |  session ${_session_total:.4f} over {_calls} calls")
+    return cost
+
+def total():
+    return _session_total</code></pre>
+<p>Now wrap every call so you never make one without seeing its price:</p>
+<pre><code>from anthropic import Anthropic
+import cost
+
+client = Anthropic()
+
+def call(label="", **kwargs):
+    resp = client.messages.create(**kwargs)
+    cost.record(kwargs["model"], resp.usage, label)
+    return resp</code></pre>
+<p>Use <code>call(...)</code> in place of <code>client.messages.create(...)</code> from here on. Every lab script in this course assumes it exists. At the end of a session, <code>cost.total()</code> tells you what the session cost, and the Console's usage page tells you what it actually billed — compare the two once, so you trust the meter.</p>
+<div class="callout caution"><span class="tag">Keep the bill small</span>
+<p>Three habits do most of the work. Default to Haiku and only move up when a task demonstrably fails on it. Set <code>max_tokens</code> to what the answer actually needs rather than a round number. And use <code>count_tokens</code>, which costs nothing, to check a prompt before sending it.</p></div><div class="callout lens"><span class="tag">Exam lens</span>
 <p>A frequent distractor puts the system prompt in the messages array as <code>{"role": "system", ...}</code>. That is the OpenAI shape, not Anthropic's, and it fails validation. Equally common: treating <code>max_tokens</code> as a budget for the whole request rather than the completion, or forgetting it is mandatory.</p>
-</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">A response prints, with a stop reason and token counts.</label><label><input type="checkbox">Your key is in the environment, and <code>.env</code> is gitignored.</label></div></div>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">A response prints, with a stop reason and token counts.</label><label><input type="checkbox"><code>cost.py</code> exists and every call prints a per-call and session cost.</label><label><input type="checkbox">Your key is in the environment, and <code>.env</code> is gitignored.</label></div></div>
 </section>
 <section class="stage">
   <div class="stage-head"><div class="num">2</div><h2>Hold a conversation the model cannot remember</h2></div>
@@ -249,7 +303,7 @@ SYSTEM = "You write concise release notes for a developer audience."
 def turn(history, user_text, model="claude-haiku-4-5"):
     history.append({"role": "user", "content": user_text})
     resp = client.messages.create(
-        model=model, max_tokens=800, system=SYSTEM, messages=history,
+        model=model, max_tokens=600, system=SYSTEM, messages=history,
     )
     text = "".join(b.text for b in resp.content if b.type == "text")
     history.append({"role": "assistant", "content": text})
@@ -276,7 +330,7 @@ print("turns:", len(history), "| last input tokens:", turn(history, "Add a headi
 <p>A long response that arrives all at once feels broken. Streaming sends tokens as they are produced, which changes perceived latency without changing cost.</p>
 <pre><code>with client.messages.stream(
     model="claude-haiku-4-5",
-    max_tokens=800,
+    max_tokens=600,
     system=SYSTEM,
     messages=[{"role": "user", "content": "Write release notes for 12 merged PRs..."}],
 ) as stream:
@@ -324,7 +378,7 @@ print("\n", final.stop_reason, final.usage)</code></pre>
 
 resp = client.messages.create(
     model="claude-haiku-4-5",
-    max_tokens=1024,
+    max_tokens=800,
     system=SYSTEM,
     tools=[RELEASE_NOTE_TOOL],
     tool_choice={"type": "tool", "name": "emit_release_notes"},   # must use this tool
@@ -378,12 +432,12 @@ print(count.input_tokens)</code></pre>
 <p class="filename">compare.py</p>
 <pre><code>import time
 
-MODELS = ["claude-haiku-4-5", "claude-sonnet-4-6"]   # confirm current IDs
+MODELS = ["claude-haiku-4-5", "claude-sonnet-5"]   # confirm current IDs
 
 for model in MODELS:
     t0 = time.time()
     resp = client.messages.create(
-        model=model, max_tokens=1024, system=SYSTEM,
+        model=model, max_tokens=800, system=SYSTEM,
         tools=[RELEASE_NOTE_TOOL], tool_choice={"type": "tool", "name": "emit_release_notes"},
         messages=[{"role": "user", "content": PR_TITLES}],
     )
@@ -394,7 +448,7 @@ for model in MODELS:
 <p>For a schema-constrained summarisation task, the smaller model usually holds up, and that is the point. The tiers differ most on multi-step reasoning, ambiguity and long-context synthesis — not on formatting work you have already constrained.</p>
 <p>Where a task genuinely needs deliberation, extended thinking gives the model room to reason before answering, at the cost of the thinking tokens:</p>
 <pre><code>resp = client.messages.create(
-    model="claude-sonnet-4-6", max_tokens=4000,
+    model="claude-sonnet-5", max_tokens=4000,
     thinking={"type": "enabled", "budget_tokens": 2000},
     messages=[{"role": "user", "content": "Which of these 40 changes are breaking, and why?"}],
 )
@@ -447,11 +501,11 @@ def call_with_retry(**kwargs):
   <p>Lab 2 turns the same assistant into something that can call your code: real tool use, the tool result loop, and an MCP server that exposes your tools to any client. The two habits that transfer are reading <code>stop_reason</code> before touching content, and treating content as a list of typed blocks rather than a string.</p>
 </div>
 
-<div class="nav-bottom"><a class="btn-back" href="index.html?v=2026090204">&#8592; Back to dashboard</a></div>
+<div class="nav-bottom"><a class="btn-back" href="index.html?v=2026090214">&#8592; Back to dashboard</a></div>
 
 <footer>
   <div>SF Knowledge Hub &middot; CCDV-F prep lab 1 of 3</div>
-  <div>build 2026090201</div>
+  <div>build 2026090211</div>
 </footer>
 
 </div>
