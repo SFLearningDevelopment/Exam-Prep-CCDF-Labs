@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<!-- build: 2026090201 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 1 &mdash; Call Claude properly | CCDV-F prep</title>
+<style>
+:root{
+  --ink:#1B2124; --ink-2:#495259; --rule:#DFE3DE; --paper:#F6F7F5; --panel:#FFFFFF;
+  --level:#2E6B34; --level-soft:#E9F2E9;
+  --lens:#B0721A; --lens-soft:#FBF4E7;
+  --verify:#41525F; --verify-soft:#EEF2F4;
+  --caution:#9E3025; --caution-soft:#FBEDEB;
+  --serif: Charter,"Bitstream Charter","Iowan Old Style",Georgia,serif;
+  --sans: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);
+  font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px 90px}
+a{color:var(--level);text-decoration-thickness:1px;text-underline-offset:2px}
+.masthead{border-bottom:1px solid var(--rule);background:var(--panel)}
+.masthead .wrap{padding-top:38px;padding-bottom:30px}
+.crumb{font-family:var(--sans);font-size:13px;color:var(--ink-2);margin:0 0 14px}
+.who{float:right;font-size:12.5px;color:var(--ink-2)}
+.back{color:var(--level);text-decoration:none;font-weight:600}
+.back:hover{text-decoration:underline}
+.nav-bottom{display:flex;justify-content:center;margin:30px 0 0}
+.btn-back{display:inline-block;background:var(--level);color:#fff;text-decoration:none;
+  font-family:var(--sans);font-size:14.5px;font-weight:600;padding:11px 22px;border-radius:8px}
+.btn-back:hover{filter:brightness(1.08)}
+.setup{background:var(--level-soft);border-left:3px solid var(--level)}
+.setup .tag{color:var(--level)}
+.signout{background:none;border:0;color:var(--level);font-size:12.5px;cursor:pointer;
+  text-decoration:underline;font-family:inherit;padding:0}
+.chip{display:inline-block;font-family:var(--sans);font-size:12px;letter-spacing:.02em;
+  color:#fff;background:var(--level);border-radius:3px;padding:3px 9px;margin-right:8px}
+h1{font-family:var(--sans);font-weight:640;font-size:31px;line-height:1.2;margin:0 0 10px;letter-spacing:-.015em}
+.deck{font-size:18px;color:var(--ink-2);margin:0;max-width:62ch}
+.facts{display:flex;flex-wrap:wrap;gap:22px;margin-top:22px;padding-top:18px;border-top:1px solid var(--rule);
+  font-family:var(--sans);font-size:13.5px;color:var(--ink-2)}
+.facts b{display:block;color:var(--ink);font-weight:600}
+.progress{position:sticky;top:0;z-index:20;background:rgba(246,247,245,.94);
+  backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.progress .wrap{display:flex;align-items:center;gap:14px;padding-top:9px;padding-bottom:9px}
+.bar{flex:1;height:4px;background:var(--rule);border-radius:2px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--level);transition:width .25s ease}
+.count{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+h2{font-family:var(--sans);font-weight:640;font-size:22px;line-height:1.25;margin:0;letter-spacing:-.01em}
+h3{font-family:var(--sans);font-weight:620;font-size:16px;margin:26px 0 8px}
+p{margin:0 0 14px;max-width:70ch}
+ul,ol{max-width:70ch;padding-left:22px}
+li{margin-bottom:7px}
+code{font-family:var(--mono);font-size:.86em;background:#EFF1EE;padding:1px 5px;border-radius:3px}
+pre{font-family:var(--mono);font-size:13px;line-height:1.55;background:#171C1F;color:#E7ECEA;
+  padding:16px 18px;border-radius:5px;overflow-x:auto;margin:0 0 16px}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+.filename{font-family:var(--sans);font-size:12px;color:var(--ink-2);margin:0 0 5px}
+section.stage{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:26px 28px;margin:26px 0}
+.stage-head{display:flex;gap:16px;align-items:baseline;margin-bottom:6px}
+.num{font-family:var(--mono);font-size:14px;color:var(--level);border:1px solid var(--level);
+  border-radius:50%;width:30px;height:30px;min-width:30px;display:flex;align-items:center;
+  justify-content:center;align-self:flex-start;margin-top:2px}
+.goal{font-family:var(--sans);font-size:14px;color:var(--ink-2);margin:0 0 18px 46px}
+.stage-body{margin-left:46px}
+.callout{border-radius:5px;padding:14px 16px;margin:0 0 16px;font-size:15.5px}
+.callout p{margin:0;max-width:64ch}
+.callout p+p{margin-top:9px}
+.callout .tag{font-family:var(--sans);font-size:12.5px;font-weight:640;display:block;margin-bottom:5px}
+.lens{background:var(--lens-soft);border-left:3px solid var(--lens)}
+.lens .tag{color:var(--lens)}
+.verify{background:var(--verify-soft);border-left:3px dashed var(--verify)}
+.verify .tag{color:var(--verify)}
+.caution{background:var(--caution-soft);border-left:3px solid var(--caution)}
+.caution .tag{color:var(--caution)}
+.done{background:var(--level-soft);border-radius:5px;padding:14px 16px 8px;margin-top:20px}
+.done .tag{font-family:var(--sans);font-size:12.5px;font-weight:640;color:var(--level);display:block;margin-bottom:8px}
+.done label{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;margin-bottom:8px;cursor:pointer}
+.done input{margin-top:6px;accent-color:var(--level);width:15px;height:15px;flex:none}
+.done label.checked{color:var(--ink-2);text-decoration:line-through;text-decoration-color:var(--rule)}
+.orient{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:26px 28px;margin:26px 0}
+figure{margin:0 0 22px}
+figcaption{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);margin-top:8px}
+svg{width:100%;height:auto;display:block}
+dl{margin:0;max-width:70ch}
+dt{font-family:var(--sans);font-weight:620;font-size:15px;margin-top:14px}
+dd{margin:2px 0 0;color:var(--ink-2);font-size:16px}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:0 0 16px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--sans);font-size:13px;font-weight:620}
+footer{border-top:1px solid var(--rule);margin-top:40px;padding-top:18px;
+  font-family:var(--sans);font-size:12.5px;color:var(--ink-2);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media (max-width:620px){
+  body{font-size:16px}
+  .stage-body,.goal{margin-left:0}
+  .stage-head{gap:12px}
+  section.stage,.orient{padding:20px 18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="crumb"><span id="who" class="who"></span><a class="back" href="index.html?v=2026090204">&#8592; Dashboard</a> &middot; SF Knowledge Hub &middot; Claude Certified Developer &ndash; Foundations (CCDV-F) prep</p>
+    <p><span class="chip">Lab 1 &middot; Basic</span></p>
+    <h1>Call Claude properly</h1>
+    <p class="deck">Build a release-notes assistant on the Messages API: system prompts, multi-turn state, streaming, schema-forced output, token accounting, model choice on evidence, and the failures that only appear in production.</p>
+    <div class="facts"><div><b>Language</b>Python (TypeScript shown)</div><div><b>Time</b>2&ndash;2.5 hours</div><div><b>Cost</b>Roughly $1 in API usage</div><div><b>Exam domains</b>2, 5, 6, part of 7</div><div><b>You need</b>Python 3.10+, an Anthropic API key</div></div>
+  </div>
+</header>
+
+<div class="progress"><div class="wrap">
+  <div class="bar"><span id="fill"></span></div>
+  <div class="count" id="count">0 of 0 checks done</div>
+</div></div>
+
+<div class="wrap">
+
+<div class="orient">
+  <h2>Orientation</h2>
+  <p>You are building a release-notes assistant: it takes a list of merged pull request titles and produces a short, structured summary that a product manager can paste into a changelog. Small enough to finish, real enough to expose every mechanic the exam tests.</p>
+  <p>By the end you will have made a call, streamed one, forced the output into a schema you can trust, measured what each call costs, chosen a model on evidence rather than habit, and handled the errors that show up in production rather than in tutorials.</p>
+
+<figure>
+<svg viewBox="0 0 780 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A request goes from your script through the Anthropic SDK to the Messages API, carrying a system prompt, a message list and inference settings. The response returns content blocks, a stop reason and usage counts.">
+  <defs>
+    <marker id="c1" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#495259"/></marker>
+    <style>
+      .bx{fill:#FFFFFF;stroke:#DFE3DE;stroke-width:1.5;rx:5}
+      .bxa{fill:#E9F2E9;stroke:#2E6B34;stroke-width:1.5;rx:5}
+      .t{font-family:ui-sans-serif,'Segoe UI',Roboto,sans-serif;font-size:13px;fill:#1B2124}
+      .s{font-family:ui-sans-serif,'Segoe UI',Roboto,sans-serif;font-size:11px;fill:#495259}
+      .lbl{font-family:ui-sans-serif,'Segoe UI',Roboto,sans-serif;font-size:11px;fill:#8D979C}
+      .ln{stroke:#495259;stroke-width:1.4;fill:none;marker-end:url(#c1)}
+    </style>
+  </defs>
+  <text class="lbl" x="10" y="20">What you send</text>
+  <rect class="bxa" x="8" y="30" width="180" height="120"/>
+  <text class="t" x="26" y="54">Request</text>
+  <text class="s" x="26" y="74">model</text>
+  <text class="s" x="26" y="92">max_tokens (required)</text>
+  <text class="s" x="26" y="110">system (top level)</text>
+  <text class="s" x="26" y="128">messages[]</text>
+
+  <path class="ln" d="M190 90 H250"/>
+  <rect class="bx" x="254" y="62" width="140" height="56"/>
+  <text class="t" x="272" y="86">anthropic SDK</text>
+  <text class="s" x="272" y="103">retries, streaming</text>
+
+  <path class="ln" d="M396 90 H456"/>
+  <rect class="bx" x="460" y="62" width="150" height="56"/>
+  <text class="t" x="478" y="86">Messages API</text>
+  <text class="s" x="478" y="103">stateless</text>
+
+  <text class="lbl" x="10" y="188">What comes back</text>
+  <rect class="bxa" x="8" y="198" width="180" height="94"/>
+  <text class="t" x="26" y="222">Response</text>
+  <text class="s" x="26" y="242">content[] blocks</text>
+  <text class="s" x="26" y="260">stop_reason</text>
+  <text class="s" x="26" y="278">usage tokens</text>
+
+  <path class="ln" d="M535 122 V245 H192"/>
+  <text class="s" x="300" y="240">no server-side history &#8212; you resend it</text>
+
+  <rect class="bx" x="628" y="62" width="144" height="56"/>
+  <text class="t" x="646" y="86">Your key</text>
+  <text class="s" x="646" y="103">env var, server side</text>
+  <path class="ln" d="M626 90 H616"/>
+</svg>
+<figcaption>The API keeps no conversation state. Everything the model knows about the exchange is in the request you just sent.</figcaption>
+</figure>
+
+  <h3>Glossary</h3>
+  <dl>
+    <dt>Messages API</dt>
+    <dd>The single endpoint for text generation. It is stateless: a multi-turn conversation exists only because you resend the whole message list every time.</dd>
+    <dt>System prompt</dt>
+    <dd>A top-level <code>system</code> parameter, not a message with <code>role: "system"</code>. It sets role and rules for the whole exchange.</dd>
+    <dt>Content block</dt>
+    <dd>Responses are a list of typed blocks, not a string. A plain answer is one <code>text</code> block; tool use, images and extended thinking add other types.</dd>
+    <dt>stop_reason</dt>
+    <dd>Why generation ended: <code>end_turn</code> for a natural finish, <code>max_tokens</code> for truncation, <code>stop_sequence</code>, or <code>tool_use</code>. Your code should branch on it.</dd>
+    <dt>Prompt caching</dt>
+    <dd>Marking a stable prefix with <code>cache_control</code> so repeated calls reuse it at a lower rate. Requires a minimum prefix length and expires after a short idle window.</dd>
+  </dl>
+<div class="callout setup"><span class="tag">On API keys and cost</span>
+    <p>These labs call a real API and spend real money. Budget a few US dollars for the three labs if you keep to the small models where the lab says so.</p>
+    <p>Create a key at the Anthropic Console under API keys, put it in a workspace with a spend limit, and export it as <code>ANTHROPIC_API_KEY</code>. The SDK reads that variable, so no key ever appears in your code.</p>
+    <p>Use a personal key for now. If SourceFuse issues scoped workspace keys for training later, only the export line changes.</p>
+</div><div class="callout verify"><span class="tag">Verify</span>
+    <p>Model names, pricing and context limits change often. Every model ID here is an example. Confirm the current list in the Anthropic docs or with <code>client.models.list()</code> and use what you find.</p>
+</div></div><section class="stage">
+  <div class="stage-head"><div class="num">1</div><h2>Set up and make one call</h2></div>
+  <p class="goal">Terminal. Get a response back before anything else.</p>
+  <div class="stage-body">
+<p>Create a project, install the SDK, and put your key in the environment rather than the code.</p>
+<pre><code>mkdir claude-release-notes &amp;&amp; cd claude-release-notes
+python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install anthropic
+
+export ANTHROPIC_API_KEY="sk-ant-..."     # add to ~/.zshrc or use a .env file
+echo ".venv/\n.env" &gt; .gitignore</code></pre>
+<p class="filename">first_call.py</p>
+<pre><code>from anthropic import Anthropic
+
+client = Anthropic()          # reads ANTHROPIC_API_KEY from the environment
+
+resp = client.messages.create(
+    model="claude-haiku-4-5",
+    max_tokens=512,
+    system="You write concise release notes for a developer audience.",
+    messages=[
+        {"role": "user", "content": "Summarise: 'fix: retry on 429', 'feat: add CSV export'"}
+    ],
+)
+
+print(resp.content[0].text)
+print(resp.stop_reason, resp.usage.input_tokens, resp.usage.output_tokens)</code></pre>
+<p>Three details in that call are exam material. <code>max_tokens</code> is <strong>required</strong> and caps only the output. <code>system</code> is a top-level parameter — there is no system role inside <code>messages</code>. And <code>resp.content</code> is a list of blocks, so <code>content[0].text</code> works now but breaks the moment tools or thinking blocks appear.</p>
+<p>The TypeScript shape is the same:</p>
+<pre><code>import Anthropic from "@anthropic-ai/sdk";
+const client = new Anthropic();
+const resp = await client.messages.create({
+  model: "claude-haiku-4-5",
+  max_tokens: 512,
+  system: "You write concise release notes for a developer audience.",
+  messages: [{ role: "user", content: "Summarise: 'fix: retry on 429'" }],
+});</code></pre>
+<div class="callout lens"><span class="tag">Exam lens</span>
+<p>A frequent distractor puts the system prompt in the messages array as <code>{"role": "system", ...}</code>. That is the OpenAI shape, not Anthropic's, and it fails validation. Equally common: treating <code>max_tokens</code> as a budget for the whole request rather than the completion, or forgetting it is mandatory.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">A response prints, with a stop reason and token counts.</label><label><input type="checkbox">Your key is in the environment, and <code>.env</code> is gitignored.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">2</div><h2>Hold a conversation the model cannot remember</h2></div>
+  <p class="goal">Code. The API is stateless; multi-turn is something you build.</p>
+  <div class="stage-body">
+<p>There is no session on the server. A conversation is a list you keep and resend, and its length is what you pay for on every turn.</p>
+<p class="filename">chat.py</p>
+<pre><code>from anthropic import Anthropic
+
+client = Anthropic()
+SYSTEM = "You write concise release notes for a developer audience."
+
+def turn(history, user_text, model="claude-haiku-4-5"):
+    history.append({"role": "user", "content": user_text})
+    resp = client.messages.create(
+        model=model, max_tokens=800, system=SYSTEM, messages=history,
+    )
+    text = "".join(b.text for b in resp.content if b.type == "text")
+    history.append({"role": "assistant", "content": text})
+    return text, resp.usage
+
+history = []
+print(turn(history, "Draft notes for: 'feat: CSV export', 'fix: retry on 429'")[0])
+print(turn(history, "Shorten it to three bullets.")[0])
+print("turns:", len(history), "| last input tokens:", turn(history, "Add a heading.")[1].input_tokens)</code></pre>
+<p>Watch <code>input_tokens</code> climb on each turn. That growth is the reason context management is its own exam domain rather than an afterthought.</p>
+<p>Two constraints to know. Messages must alternate user and assistant. And you may end the list with a partial <em>assistant</em> message to constrain the opening of the reply:</p>
+<pre><code>messages=[
+    {"role": "user", "content": "List the three changes as JSON."},
+    {"role": "assistant", "content": "["},      # prefill: the reply continues from here
+]</code></pre>
+<div class="callout lens"><span class="tag">Exam lens</span>
+<p>Statelessness drives several answers. "Conversation history is growing past the context window" is solved by summarising or dropping older turns, not by a larger <code>max_tokens</code>. "Responses drift from the required format over a long chat" points at the system prompt, which applies to every turn, rather than at repeating instructions in each user message. And assistant prefill is the cheapest way to force a reply to start in a given shape.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">A three-turn conversation keeps context across turns.</label><label><input type="checkbox">You can state how input tokens changed from turn one to turn three, and why.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">3</div><h2>Stream, and handle what streaming breaks</h2></div>
+  <p class="goal">Code. Latency is a design decision, not a detail.</p>
+  <div class="stage-body">
+<p>A long response that arrives all at once feels broken. Streaming sends tokens as they are produced, which changes perceived latency without changing cost.</p>
+<pre><code>with client.messages.stream(
+    model="claude-haiku-4-5",
+    max_tokens=800,
+    system=SYSTEM,
+    messages=[{"role": "user", "content": "Write release notes for 12 merged PRs..."}],
+) as stream:
+    for chunk in stream.text_stream:
+        print(chunk, end="", flush=True)
+
+    final = stream.get_final_message()   # full message once the stream ends
+print("\n", final.stop_reason, final.usage)</code></pre>
+<p>Streaming complicates three things worth knowing before you reach for it: you cannot validate the whole output until it is finished, so schema checks happen at the end; an error can arrive mid-stream after you have already shown text to the user; and time-to-first-token, not total duration, is the number that matters to the person waiting.</p>
+<div class="callout caution"><span class="tag">Long requests</span>
+<p>Very long non-streaming requests can hit a timeout at the network layer before the model finishes. If a large <code>max_tokens</code> request fails with a timeout, streaming is the fix rather than a longer client timeout.</p>
+</div><div class="callout lens"><span class="tag">Exam lens</span>
+<p>Distinguish the two latency levers. Streaming changes when the user sees the <em>first</em> token; it does not reduce total generation time or cost. Reducing <code>max_tokens</code>, shortening the prompt, or moving to a smaller model changes the actual work. A scenario complaining that "users think the app has frozen" wants streaming; one complaining that "responses take too long and cost too much" wants a model or prompt change.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">Text appears progressively rather than in one block.</label><label><input type="checkbox">You retrieve the final message after the stream and read its stop reason.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">4</div><h2>Force output into a shape you can parse</h2></div>
+  <p class="goal">Code. Asking politely for JSON is not a contract.</p>
+  <div class="stage-body">
+<p>Prompting for JSON usually works and occasionally does not, and the failure lands in production at 2am. Defining a tool with an input schema and requiring its use turns the format into a constraint the API enforces.</p>
+<p class="filename">structured.py</p>
+<pre><code>RELEASE_NOTE_TOOL = {
+    "name": "emit_release_notes",
+    "description": "Return structured release notes for a set of merged pull requests.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "headline": {"type": "string", "description": "One line, under 60 characters"},
+            "highlights": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string"},
+                        "category": {"type": "string", "enum": ["feature", "fix", "chore"]},
+                        "breaking": {"type": "boolean"},
+                    },
+                    "required": ["title", "category", "breaking"],
+                },
+            },
+        },
+        "required": ["headline", "highlights"],
+    },
+}
+
+resp = client.messages.create(
+    model="claude-haiku-4-5",
+    max_tokens=1024,
+    system=SYSTEM,
+    tools=[RELEASE_NOTE_TOOL],
+    tool_choice={"type": "tool", "name": "emit_release_notes"},   # must use this tool
+    messages=[{"role": "user", "content": PR_TITLES}],
+)
+
+notes = next(b.input for b in resp.content if b.type == "tool_use")
+print(notes["headline"], len(notes["highlights"]))</code></pre>
+<p>Note what changed. <code>stop_reason</code> is now <code>tool_use</code>, the payload arrives in a <code>tool_use</code> block's <code>input</code> field already parsed as an object, and there is no JSON string to clean up. The "tool" here executes nothing — it exists purely to describe a shape.</p>
+<p>Descriptions inside the schema are read by the model. "One line, under 60 characters" does more work than any instruction in the system prompt.</p>
+<div class="callout lens"><span class="tag">Exam lens</span>
+<p>Rank the three approaches to structured output. Prompt-only JSON is the weakest and needs defensive parsing. Assistant prefill with <code>[</code> or <code>{</code> is stronger and free. A tool schema with <code>tool_choice</code> forcing it is strongest, and is the expected answer whenever a scenario says the output feeds another system. Watch for the distractor that reaches for a larger model to fix malformed JSON, which treats a design problem as a capability problem.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">Structured notes come back as a parsed object, with no <code>json.loads</code> on model text.</label><label><input type="checkbox">A schema field description visibly changes the output when you edit it.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">5</div><h2>Count tokens and cut the bill</h2></div>
+  <p class="goal">Code. Cost is a first-class engineering property here.</p>
+  <div class="stage-body">
+<p>Measure before optimising. The API can count tokens for a request without running it:</p>
+<pre><code>count = client.messages.count_tokens(
+    model="claude-haiku-4-5", system=SYSTEM,
+    messages=[{"role": "user", "content": PR_TITLES}],
+)
+print(count.input_tokens)</code></pre>
+<p>Now apply prompt caching. If a long, stable prefix — a style guide, schema documentation, examples — repeats across calls, mark the end of it and subsequent calls reuse the processed prefix at a reduced rate:</p>
+<pre><code>system=[
+    {"type": "text", "text": SYSTEM},
+    {"type": "text", "text": STYLE_GUIDE,           # long and unchanging
+     "cache_control": {"type": "ephemeral"}},
+]</code></pre>
+<p>Then read <code>usage.cache_creation_input_tokens</code> on the first call and <code>usage.cache_read_input_tokens</code> on the second. If the second is zero, the prefix was below the minimum cacheable length or the cache had expired.</p>
+<table>
+  <tr><th>Lever</th><th>What it changes</th><th>Reach for it when</th></tr>
+  <tr><td>Prompt caching</td><td>Cheaper reuse of a stable prefix</td><td>The same long context repeats across calls</td></tr>
+  <tr><td>Batch API</td><td>Substantially lower rate, asynchronous</td><td>Latency does not matter — backfills, bulk jobs</td></tr>
+  <tr><td>Smaller model</td><td>Lower rate and faster</td><td>The task is classification, extraction or routing</td></tr>
+  <tr><td>Shorter context</td><td>Fewer input tokens on every call</td><td>Almost always the first thing to try</td></tr>
+  <tr><td>Lower max_tokens</td><td>Caps output cost and truncation risk</td><td>Output length is predictable</td></tr>
+</table>
+<div class="callout verify"><span class="tag">Verify</span>
+<p>Cacheable minimum lengths, cache lifetime and batch discount all change. Confirm current figures in the docs before quoting them to anyone.</p>
+</div><div class="callout lens"><span class="tag">Exam lens</span>
+<p>Read the constraint in the question. "Reduce cost without changing latency" rules out the Batch API. "Cut cost for an overnight job" rules it in. "The same 20-page policy is sent with every request" is caching. And know that caching bills the first call slightly higher to write the cache, so it pays off across repeated calls rather than on one.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">You have a token count for your prompt before sending it.</label><label><input type="checkbox">A second cached call shows non-zero cache read tokens.</label><label><input type="checkbox">You can name the cheapest lever for your own workload and say why.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">6</div><h2>Choose a model with evidence</h2></div>
+  <p class="goal">Code. Replace habit with a small experiment.</p>
+  <div class="stage-body">
+<p>Run the same task across the model tiers and record quality, latency and cost. Twenty PR-title sets are enough to see a pattern.</p>
+<p class="filename">compare.py</p>
+<pre><code>import time
+
+MODELS = ["claude-haiku-4-5", "claude-sonnet-4-6"]   # confirm current IDs
+
+for model in MODELS:
+    t0 = time.time()
+    resp = client.messages.create(
+        model=model, max_tokens=1024, system=SYSTEM,
+        tools=[RELEASE_NOTE_TOOL], tool_choice={"type": "tool", "name": "emit_release_notes"},
+        messages=[{"role": "user", "content": PR_TITLES}],
+    )
+    out = next(b.input for b in resp.content if b.type == "tool_use")
+    print(f"{model:24} {time.time()-t0:5.2f}s  "
+          f"in={resp.usage.input_tokens:5}  out={resp.usage.output_tokens:5}  "
+          f"items={len(out['highlights'])}")</code></pre>
+<p>For a schema-constrained summarisation task, the smaller model usually holds up, and that is the point. The tiers differ most on multi-step reasoning, ambiguity and long-context synthesis — not on formatting work you have already constrained.</p>
+<p>Where a task genuinely needs deliberation, extended thinking gives the model room to reason before answering, at the cost of the thinking tokens:</p>
+<pre><code>resp = client.messages.create(
+    model="claude-sonnet-4-6", max_tokens=4000,
+    thinking={"type": "enabled", "budget_tokens": 2000},
+    messages=[{"role": "user", "content": "Which of these 40 changes are breaking, and why?"}],
+)
+answer = "".join(b.text for b in resp.content if b.type == "text")</code></pre>
+<p>The response now contains thinking blocks alongside text blocks, which is the second time in this lab that <code>content[0].text</code> would have been wrong.</p>
+<div class="callout lens"><span class="tag">Exam lens</span>
+<p>Model-selection questions describe a workload and expect a tier. High volume, simple, latency-sensitive classification points at the smallest model. Multi-step reasoning over ambiguous input points higher. A mixed workload points at routing — a cheap model first, escalating only when it is uncertain. Extended thinking is for genuine reasoning depth, not for making short answers better, and its budget comes out of <code>max_tokens</code>.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">You have latency and token numbers for at least two models on the same task.</label><label><input type="checkbox">You picked a model for this task and can defend it in one sentence.</label></div></div>
+</section>
+<section class="stage">
+  <div class="stage-head"><div class="num">7</div><h2>Handle failure like production</h2></div>
+  <p class="goal">Code. The difference between a demo and an application.</p>
+  <div class="stage-body">
+<p>Everything so far assumed success. Now handle the four failures that actually occur.</p>
+<pre><code>import anthropic, time, random
+
+def call_with_retry(**kwargs):
+    for attempt in range(5):
+        try:
+            return client.messages.create(**kwargs)
+        except anthropic.RateLimitError:                 # 429
+            wait = (2 ** attempt) + random.random()
+        except anthropic.APIStatusError as e:            # 5xx, including overloaded
+            if e.status_code &lt; 500:
+                raise                                    # 4xx: your bug, do not retry
+            wait = (2 ** attempt) + random.random()
+        except anthropic.APIConnectionError:             # network
+            wait = (2 ** attempt) + random.random()
+        print(f"retry {attempt+1} in {wait:.1f}s")
+        time.sleep(wait)
+    raise RuntimeError("exhausted retries")</code></pre>
+<table>
+  <tr><th>Failure</th><th>Right response</th></tr>
+  <tr><td>429 rate limit</td><td>Exponential backoff with jitter; respect retry headers; consider batching</td></tr>
+  <tr><td>529 overloaded</td><td>Backoff and retry — transient, not your fault</td></tr>
+  <tr><td>400 invalid request</td><td>Never retry. Fix the request: missing <code>max_tokens</code>, bad role order, oversized context</td></tr>
+  <tr><td>401 authentication</td><td>Never retry. The key is wrong, missing or revoked</td></tr>
+  <tr><td><code>stop_reason == "max_tokens"</code></td><td>Not an exception at all. Output was truncated; raise the cap or shorten the task</td></tr>
+</table>
+<p>The SDK retries some of this for you — <code>Anthropic(max_retries=3)</code> — but writing it once teaches which classes are retryable, which is what gets tested.</p>
+<div class="callout caution"><span class="tag">Keys</span>
+<p>Never ship a key to a browser or mobile client. Anything the user's device holds, the user holds. Calls go through your backend, which holds the key in an environment variable or a secret manager and rotates it on a schedule. A key committed to git is compromised even after you delete the commit.</p>
+</div><div class="callout lens"><span class="tag">Exam lens</span>
+<p>The retryable/non-retryable split is the testable idea: 429 and 5xx yes, 4xx no. A scenario where retries make things worse is describing a client hammering a 400. Separately, know that a truncated response is a stop reason rather than an error, so it will never appear in your exception handler — code that only catches exceptions ships silently truncated output.</p>
+</div><div class="done"><span class="tag">Done when</span><label><input type="checkbox">A forced 400 fails immediately rather than retrying five times.</label><label><input type="checkbox">A truncated response is detected via stop reason, not an exception.</label><label><input type="checkbox">Your key exists only in the environment, and nothing in git contains it.</label></div></div>
+</section>
+
+<div class="orient">
+  <h2>What to carry into Lab 2</h2>
+  <p>Lab 2 turns the same assistant into something that can call your code: real tool use, the tool result loop, and an MCP server that exposes your tools to any client. The two habits that transfer are reading <code>stop_reason</code> before touching content, and treating content as a list of typed blocks rather than a string.</p>
+</div>
+
+<div class="nav-bottom"><a class="btn-back" href="index.html?v=2026090204">&#8592; Back to dashboard</a></div>
+
+<footer>
+  <div>SF Knowledge Hub &middot; CCDV-F prep lab 1 of 3</div>
+  <div>build 2026090201</div>
+</footer>
+
+</div>
+
+<!-- Auth gate (Google SSO via redirect + email/password), same as prep pages -->
+<script>
+/* SF auth gate — Google SSO (hd: sourcefuse.com, redirect) + email/password.
+   Reuses sfcertification-grafana. PASTE the live config below per the golden rule. */
+(function () {
+const firebaseConfig = {
+  apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain: "sfcertification-grafana.firebaseapp.com",
+  projectId: "sfcertification-grafana",
+  storageBucket: "sfcertification-grafana.firebasestorage.app",
+  messagingSenderId: "227322696511",
+  appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+  const ALLOWED_DOMAIN = "sourcefuse.com";
+  const ALLOWED_EXTRA = ["ravjv2013@gmail.com"];  // TEST ONLY — remove after testing
+  // Google SSO is restricted to these admin addresses ONLY. Everyone else signs in
+  // with email/password (that path is unchanged and still uses validDomain()).
+  const ADMIN_SSO = ["jv.ravichandran@sourcefuse.com","noushin.khan@sourcefuse.com"];
+  let auth, GoogleProvider, signInRedirect, signInPopup, getRedirect, signInEmail, onAuth, signOutFn, appMod;
+  let readyCb = null;
+
+  async function initFirebase() {
+    appMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const authMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    const app = appMod.getApps().length ? appMod.getApp() : appMod.initializeApp(firebaseConfig);
+    auth = authMod.getAuth(app);
+    GoogleProvider = authMod.GoogleAuthProvider;
+    signInRedirect = (p) => authMod.signInWithRedirect(auth, p);
+    signInPopup = (p) => authMod.signInWithPopup(auth, p);
+    getRedirect = () => authMod.getRedirectResult(auth);
+    signInEmail = (e, pw) => authMod.signInWithEmailAndPassword(auth, e, pw);
+    onAuth = (cb) => authMod.onAuthStateChanged(auth, cb);
+    signOutFn = () => authMod.signOut(auth);
+  }
+  function styleTag(){return `<style>
+    .sf-auth-backdrop{position:fixed;inset:0;background:rgba(16,38,60,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+    .sf-auth-card{background:#fff;border-radius:16px;padding:30px 28px;width:100%;max-width:380px;box-shadow:0 12px 40px rgba(10,30,55,.25)}
+    .sf-auth-badge{display:inline-block;background:var(--blue,#1a6eb5);color:#fff;font-weight:700;font-size:12px;padding:4px 11px;border-radius:14px;margin-bottom:14px}
+    .sf-auth-card h2{margin:0 0 4px;font-size:20px;color:#1a2733}
+    .sf-auth-sub{margin:0 0 20px;color:#5a6b7a;font-size:14px}
+    .sf-google{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:1.5px solid #dbe3ec;border-radius:10px;padding:12px;font-size:15px;font-weight:600;color:#1a2733;cursor:pointer;font-family:inherit}
+    .sf-google:hover{background:#f7fbff;border-color:var(--blue,#1a6eb5)}
+    .sf-g{background:conic-gradient(from -45deg,#ea4335 0 25%,#fbbc05 0 50%,#34a853 0 75%,#4285f4 0);color:#fff;font-weight:800;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+    .sf-or{display:flex;align-items:center;text-align:center;color:#93a1af;font-size:12px;margin:18px 0}
+    .sf-or::before,.sf-or::after{content:"";flex:1;height:1px;background:#e2e8ef}
+    .sf-or span{padding:0 12px}
+    .sf-lbl{display:block;font-size:12.5px;font-weight:600;color:#5a6b7a;margin-bottom:5px}
+    .sf-inp{width:100%;border:1.5px solid #dbe3ec;border-radius:9px;padding:11px 12px;font-size:14.5px;margin-bottom:14px;font-family:inherit}
+    .sf-inp:focus{outline:none;border-color:var(--blue,#1a6eb5)}
+    .sf-signin{width:100%;background:var(--blue,#1a6eb5);color:#fff;border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+    .sf-signin:hover{background:var(--blue-d,#12507f)}
+    .sf-err{color:#b5341a;font-size:13px;margin-top:12px;min-height:16px}
+  </style>`;}
+  function overlayHTML(){return `
+    <div class="sf-auth-backdrop" id="sf-auth"><div class="sf-auth-card">
+      <div class="sf-auth-badge">SF Knowledge Hub</div>
+      <h2>Sign in</h2>
+      <p class="sf-auth-sub">Use your SourceFuse account to view your results.</p>
+      <button class="sf-google" id="sf-google"><span class="sf-g">G</span> Sign in with Google</button>
+      <div class="sf-or"><span>or</span></div>
+      <label class="sf-lbl">Email</label>
+      <input class="sf-inp" id="sf-email" type="email" placeholder="you@sourcefuse.com" autocomplete="username">
+      <label class="sf-lbl">Password</label>
+      <input class="sf-inp" id="sf-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+      <button class="sf-signin" id="sf-signin">Sign in</button>
+      <div class="sf-err" id="sf-err"></div>
+    </div></div>`;}
+  function fail(m){const e=document.getElementById("sf-err");if(e)e.textContent=m;}
+  function validDomain(x){if(typeof x!=="string")return false;var e=x.toLowerCase();return e.endsWith("@"+ALLOWED_DOMAIN)||ALLOWED_EXTRA.includes(e);}
+  function validGoogle(x){if(typeof x!=="string")return false;return ADMIN_SSO.includes(x.toLowerCase());}
+  function isGoogleUser(u){try{return !!(u&&u.providerData&&u.providerData.some(function(p){return p&&p.providerId==="google.com";}));}catch(_){return false;}}
+  function proceed(email){const el=document.getElementById("sf-auth");if(el)el.remove();if(readyCb)readyCb(email,signOutFn);}
+  function wireOverlay(){
+    document.getElementById("sf-google").addEventListener("click",async()=>{
+      fail("");
+      if(!signInRedirect)return fail("Auth service not ready — Google SSO needs the deployed https host. Use email/password below.");
+      const p=new GoogleProvider();p.setCustomParameters({hd:ALLOWED_DOMAIN,prompt:"select_account"});
+      // Popup avoids the cross-site redirect handshake that browsers now block.
+      if(signInPopup){
+        try{
+          console.log("[auth] starting Google popup…");
+          const r=await signInPopup(p);
+          const email=(r&&r.user&&r.user.email)||"";
+          console.log("[auth] popup result; user:",email);
+          if(!validGoogle(email)){await signOutFn();return fail("Google sign-in is restricted to admin accounts. Use email/password below.");}
+          return proceed(email);
+        }catch(e){
+          console.log("[auth] signInWithPopup failed; code:",e&&e.code,"| message:",e&&e.message);
+          const blocked=e&&(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment");
+          if(!blocked)return fail("Google sign-in couldn't complete. Use email/password below.");
+        }
+      }
+      try{
+        try{sessionStorage.setItem("sf-google-pending","1");}catch(_){}
+        console.log("[auth] popup unavailable — falling back to redirect…");
+        await signInRedirect(p);}
+      catch(e){console.log("[auth] signInWithRedirect failed; code:",e&&e.code,"| message:",e&&e.message);fail("Google sign-in couldn't start. Use email/password below.");}
+    });
+    document.getElementById("sf-signin").addEventListener("click",async()=>{
+      fail("");
+      const email=(document.getElementById("sf-email").value||"").trim();
+      const pass=document.getElementById("sf-pass").value||"";
+      console.log("[auth] sign-in clicked; email:",email,"| password length:",pass.length);
+      console.log("[auth] validDomain(email):",validDomain(email));
+      if(!validDomain(email))return fail("Email must be an @sourcefuse.com address.");
+      if(!pass)return fail("Enter your password.");
+      try{const r=await signInEmail(email,pass);console.log("[auth] signInEmail success; user:",r.user&&r.user.email);proceed((r.user&&r.user.email)||email);}
+      catch(e){console.log("[auth] signInEmail failed; code:",e&&e.code,"| message:",e&&e.message);fail("Incorrect email or password.");}
+    });
+  }
+  async function mount(onReady){
+    readyCb=onReady;
+    document.head.insertAdjacentHTML("beforeend",styleTag());
+    document.body.insertAdjacentHTML("beforeend",overlayHTML());
+    try{await initFirebase();}catch(e){fail("Auth service loading… (Google SSO needs the deployed https host).");}
+    if(getRedirect){
+      try{const res=await getRedirect();
+        console.log("[auth] getRedirectResult resolved:",res,"| user:",res&&res.user&&res.user.email);
+        if(res&&res.user){const email=res.user.email;
+          if(!validGoogle(email)){await signOutFn();fail("Google sign-in is restricted to admin accounts. Use email/password below.");}
+          else{proceed(email);return;}}
+        else if(sessionStorage.getItem("sf-google-pending")==="1"){
+          sessionStorage.removeItem("sf-google-pending");
+          console.log("[auth] redirect returned NO pending result — handshake lost (likely third-party cookie/storage blocking).");
+          fail("Google sign-in didn't complete (browser blocked the sign-in handshake). Use email/password below.");
+        }
+      }catch(e){
+        console.log("[auth] getRedirectResult error; code:",e&&e.code,"| message:",e&&e.message);
+        fail("Google sign-in didn't complete. Try again or use email/password.");
+      }
+    }
+    if(onAuth){onAuth(async(u)=>{
+      if(!u)return;
+      if(isGoogleUser(u)){
+        if(validGoogle(u.email))proceed(u.email);
+        else{console.log("[auth] non-admin Google session rejected:",u.email);await signOutFn();fail("Google sign-in is restricted to admin accounts. Use email/password below.");}
+        return;
+      }
+      if(validDomain(u.email))proceed(u.email);
+    });}
+    wireOverlay();
+  }
+  window.SFAuth={mount};
+})();
+</script>
+
+
+<!-- Lab progress — matches the deployed Type 2 course:
+     section state -> progress/{uid} (legacy collection, still in use)
+     completions   -> courseProgress/{uid} with completedOn / completedAt
+                      date+time STRINGS, which is what the admin Course
+                      Progress reader keys on. Not a boolean.
+     Reuses the DEFAULT Firebase app already initialised by the auth gate. -->
+<script type="module">
+(function(){
+  var CP_COURSE_ID = "__PASTE_COURSE_DOC_ID__";
+  var MODULE_KEY   = "ccdv-f-lab-basic";
+  var PROGRESS_KEY = "ccdv_m1";        /* progress/{uid} field, mirrors af_m1 convention */
+  var MODULE_KEYS  = ["ccdv-f-lab-basic","ccdv-f-lab-intermediate","ccdv-f-lab-advanced"];
+  var FB = "https://www.gstatic.com/firebasejs/10.12.2/";
+
+  var boxes = [], fs = null, cpRef = null, prRef = null, courseObj = {}, user = null;
+
+  function stamp(){
+    var p = function(n){ return String(n).padStart(2,"0"); };
+    var d = new Date();
+    return { date: d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()),
+             time: p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()) };
+  }
+  function checkedIndices(){
+    var out = []; boxes.forEach(function(b,i){ if(b.checked) out.push(i); }); return out;
+  }
+  function isDone(obj, mk){
+    var m = (obj.modules||{})[mk]; return !!(m && m.completedOn);
+  }
+  function render(){
+    var done = checkedIndices().length;
+    document.getElementById('fill').style.width =
+      (boxes.length ? (done/boxes.length)*100 : 0) + '%';
+    document.getElementById('count').textContent =
+      done + ' of ' + boxes.length + ' checks done'
+      + (done === boxes.length && boxes.length ? ' · lab complete' : '');
+    boxes.forEach(function(b){ b.parentNode.classList.toggle('checked', b.checked); });
+  }
+
+  /* Section checkboxes for this lab, stored as an array of indices. */
+  function saveSections(){
+    var payload = {}; payload[PROGRESS_KEY] = checkedIndices();
+    return fs.setDoc(prRef, payload, { merge: true });
+  }
+
+  /* Stamps course start on first contact and records the current module.
+     Only writes when the stored value would actually change. */
+  function setModuleInProgress(){
+    if (courseObj.courseCompletedOn) return Promise.resolve();
+    if (isDone(courseObj, MODULE_KEY)) return Promise.resolve();
+    var needStart = !courseObj.courseStartedOn;
+    if (courseObj.moduleInProgress === MODULE_KEY && !needStart) return Promise.resolve();
+
+    var t = stamp();
+    var courseUpdate = { moduleInProgress: MODULE_KEY };
+    if (needStart) { courseUpdate.courseStartedOn = t.date; courseUpdate.courseStartedAt = t.time; }
+
+    var update = { email: user.email, name: user.displayName || user.email, courses: {} };
+    update.courses[CP_COURSE_ID] = courseUpdate;
+    courseObj.moduleInProgress = MODULE_KEY;
+    if (needStart) courseObj.courseStartedOn = t.date;
+
+    return fs.setDoc(cpRef, update, { merge: true })
+      .catch(function(e){ console.error("moduleInProgress write failed", e); });
+  }
+
+  /* Read-then-merge completion write. Preserves other courses and any module
+     already recorded, and stamps course start / course completion. */
+  function completeModule(){
+    var t = stamp();
+    return fs.getDoc(cpRef).then(function(snap){
+      var data = snap.exists() ? (snap.data()||{}) : {};
+      var obj  = (data.courses||{})[CP_COURSE_ID] || {};
+      var existing = obj.modules || {};
+
+      var courseUpdate = { modules: {} };
+      if (!obj.courseStartedOn) { courseUpdate.courseStartedOn = t.date; courseUpdate.courseStartedAt = t.time; }
+      if (!(existing[MODULE_KEY] && existing[MODULE_KEY].completedOn)) {
+        courseUpdate.modules[MODULE_KEY] = { completedOn: t.date, completedAt: t.time };
+      }
+
+      var doneAfter = function(mk){
+        return !!((existing[mk] && existing[mk].completedOn) || courseUpdate.modules[mk]);
+      };
+      if (MODULE_KEYS.every(doneAfter)) {
+        if (!obj.courseCompletedOn) { courseUpdate.courseCompletedOn = t.date; courseUpdate.courseCompletedAt = t.time; }
+        courseUpdate.moduleInProgress = null;
+      } else {
+        var next = null;
+        for (var i = 0; i < MODULE_KEYS.length; i++) {
+          if (!doneAfter(MODULE_KEYS[i])) { next = MODULE_KEYS[i]; break; }
+        }
+        courseUpdate.moduleInProgress = next;
+      }
+
+      var update = { email: user.email, name: user.displayName || user.email, courses: {} };
+      update.courses[CP_COURSE_ID] = courseUpdate;
+      courseObj = Object.assign({}, obj, courseUpdate);
+      return fs.setDoc(cpRef, update, { merge: true });
+    });
+  }
+
+  async function boot(){
+    var appMod  = await import(FB + "firebase-app.js");
+    var authMod = await import(FB + "firebase-auth.js");
+    fs          = await import(FB + "firebase-firestore.js");
+    var app = appMod.getApp();                    /* DEFAULT app, never a named one */
+    user    = authMod.getAuth(app).currentUser;
+    var db  = fs.getFirestore(app);
+    cpRef   = fs.doc(db, "courseProgress", user.uid);
+    prRef   = fs.doc(db, "progress",       user.uid);
+
+    var indices = [];
+    try {
+      var ps = await fs.getDoc(prRef);
+      if (ps.exists()) indices = (ps.data()||{})[PROGRESS_KEY] || [];
+    } catch(e){ console.error("progress read failed", e); }
+    boxes.forEach(function(b,i){ b.checked = indices.indexOf(i) !== -1; });
+
+    try {
+      var cs = await fs.getDoc(cpRef);
+      if (cs.exists()) courseObj = ((cs.data()||{}).courses||{})[CP_COURSE_ID] || {};
+    } catch(e){ console.error("courseProgress read failed", e); }
+
+    render();
+    await setModuleInProgress();
+  }
+
+  window.SFAuth.mount(async function(email, signOut){
+    document.getElementById('who').innerHTML =
+      email + ' <button class="signout" id="signout">Sign out</button>';
+    var so = document.getElementById('signout');
+    if (so && signOut) so.onclick = function(){ signOut().then(function(){ location.reload(); }); };
+
+    boxes = Array.prototype.slice.call(document.querySelectorAll('.done input[type=checkbox]'));
+
+    try { await boot(); }
+    catch(e){ console.error("[progress] running in-page only:", e); render(); }
+
+    boxes.forEach(function(b){
+      b.addEventListener('change', async function(){
+        render();
+        if (!fs) return;
+        try {
+          await saveSections();
+          if (boxes.every(function(x){ return x.checked; }) && !isDone(courseObj, MODULE_KEY)) {
+            await completeModule();
+          }
+        } catch(e){ console.error("[progress] save failed:", e); }
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
