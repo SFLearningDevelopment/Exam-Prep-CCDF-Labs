@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- build: 2026090203 -->
+<!-- build: 2026090213 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -106,11 +106,11 @@ footer{border-top:1px solid var(--rule);margin-top:40px;padding-top:18px;
 
 <header class="masthead">
   <div class="wrap">
-    <p class="crumb"><span id="who" class="who"></span><a class="back" href="index.html?v=2026090204">&#8592; Dashboard</a> &middot; SF Knowledge Hub &middot; Claude Certified Developer &ndash; Foundations (CCDV-F) prep</p>
+    <p class="crumb"><span id="who" class="who"></span><a class="back" href="index.html?v=2026090214">&#8592; Dashboard</a> &middot; SF Knowledge Hub &middot; Claude Certified Developer &ndash; Foundations (CCDV-F) prep</p>
     <p><span class="chip">Lab 3 &middot; Advanced</span></p>
     <h1>Build and ship an agent</h1>
     <p class="deck">Choose the pattern honestly, build the loop with budgets and a trace, delegate to subagents, manage memory, enforce rules with hooks rather than requests, evaluate the path as well as the answer, and ship it with configuration, secrets and logs that survive contact with production.</p>
-    <div class="facts"><div><b>Language</b>Python (TypeScript shown)</div><div><b>Time</b>3.5&ndash;4 hours</div><div><b>Cost</b>Roughly $3&ndash;4 in API usage</div><div><b>Exam domains</b>1, 2, 3, 4, 5, 7</div><div><b>You need</b>Labs 1 and 2 finished</div></div>
+    <div class="facts"><div><b>Language</b>Python (TypeScript shown)</div><div><b>Time</b>3.5&ndash;4 hours</div><div><b>Cost</b>About $2 with the budget guard at 60k</div><div><b>Exam domains</b>1, 2, 3, 4, 5, 7</div><div><b>You need</b>Labs 1 and 2 finished</div></div>
   </div>
 </header>
 
@@ -223,8 +223,8 @@ footer{border-top:1px solid var(--rule);margin-top:40px;padding-top:18px;
 <p>The Lab 2 loop already runs until the model stops calling tools. An agent adds three things: an explicit plan, resource limits, and a record of what happened.</p>
 <p class="filename">agent.py</p>
 <pre><code>class Agent:
-    def __init__(self, tools, registry, model="claude-sonnet-4-6",
-                 max_steps=12, token_budget=120_000):
+    def __init__(self, tools, registry, model="claude-sonnet-5",
+                 max_steps=8, token_budget=60_000):
         self.tools, self.registry = tools, registry
         self.model, self.max_steps, self.token_budget = model, max_steps, token_budget
 
@@ -234,7 +234,7 @@ footer{border-top:1px solid var(--rule);margin-top:40px;padding-top:18px;
 
         for step in range(self.max_steps):
             resp = client.messages.create(
-                model=self.model, max_tokens=4096, system=system,
+                model=self.model, max_tokens=2000, system=system,
                 tools=self.tools, messages=messages,
             )
             spent += resp.usage.input_tokens + resp.usage.output_tokens
@@ -252,6 +252,7 @@ footer{border-top:1px solid var(--rule);margin-top:40px;padding-top:18px;
             messages.append({"role": "user", "content": self._execute(resp.content)})
 
         return {"status": "step_limit", "trace": trace}</code></pre>
+<p>The budget is deliberately tight at 60,000 tokens and eight steps. That is enough for this task and small enough that a runaway loop costs cents rather than dollars — raise it only once a run has legitimately hit the ceiling. Print <code>cost.total()</code> after each run to see what the agent actually spent.</p>
 <p>Three termination conditions, all explicit: the model finished, the step ceiling hit, the token budget hit. An agent with only the first is an agent that can run until your card declines.</p>
 <p>The system prompt does the planning work:</p>
 <pre><code>SYSTEM = '''You produce release notes for a repository over a date range.
@@ -277,7 +278,7 @@ Rules:
     '''Runs as a separate invocation with its own context window.'''
     resp = client.messages.create(
         model="claude-haiku-4-5",             # cheaper model, narrower task
-        max_tokens=2048,
+        max_tokens=1200,
         system="Classify each pull request as feature, fix or chore. Flag breaking changes.",
         tools=[CLASSIFY_TOOL],
         tool_choice={"type": "tool", "name": "emit_classification"},
@@ -407,7 +408,7 @@ def score(case):
 
 class Settings(BaseSettings):
     anthropic_api_key: str                 # from env, never a default
-    model_orchestrator: str = "claude-sonnet-4-6"
+    model_orchestrator: str = "claude-sonnet-5"
     model_worker: str = "claude-haiku-4-5"
     max_steps: int = 12
     token_budget: int = 120_000
@@ -445,11 +446,11 @@ class Settings(BaseSettings):
   <p>What the labs do not cover, and the exam may: the breadth of Claude Code operation beyond hooks and permissions, deployment on cloud platforms, and the full range of MCP resource and prompt primitives. Read those in the exam guide. The most useful remaining exercise is to take the release-notes agent and rebuild it as a plain chain — the same output with none of the autonomy — then argue for one over the other. That argument is what Domain 1 tests.</p>
 </div>
 
-<div class="nav-bottom"><a class="btn-back" href="index.html?v=2026090204">&#8592; Back to dashboard</a></div>
+<div class="nav-bottom"><a class="btn-back" href="index.html?v=2026090214">&#8592; Back to dashboard</a></div>
 
 <footer>
   <div>SF Knowledge Hub &middot; CCDV-F prep lab 3 of 3</div>
-  <div>build 2026090203</div>
+  <div>build 2026090213</div>
 </footer>
 
 </div>
